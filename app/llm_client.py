@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, TypeVar
 
+import requests
 from pydantic import BaseModel, ValidationError
 
 from app.config import OLLAMA_HOST, OLLAMA_MODEL
@@ -64,6 +65,43 @@ class OllamaClient:
             return schema_model.model_validate_json(content)
         except ValidationError as e:
             raise LLMValidationError(str(e)) from e
+        except LLMError:
+            raise
+        except Exception as e:
+            raise LLMConnectionError(str(e)) from e
+
+    def health_check(self, timeout: float = 3.0) -> dict[str, Any]:
+        """Probe Ollama /api/tags; return ok flag and available models."""
+        result: dict[str, Any] = {
+            "ok": False,
+            "model": self.model,
+            "host": self.host,
+            "models_available": [],
+        }
+        try:
+            response = requests.get(f"{self.host}/api/tags", timeout=timeout)
+            response.raise_for_status()
+            models = response.json().get("models", [])
+            result["models_available"] = [m.get("name", "") for m in models if m.get("name")]
+            result["ok"] = True
+        except (requests.RequestException, ValueError):
+            pass
+        return result
+
+    def chat_text(
+        self,
+        messages: list[dict[str, str]],
+        temperature: float = 0.3,
+    ) -> str:
+        """Unstructured chat for template assist/fill (no JSON schema)."""
+        try:
+            response = self.client.chat(
+                model=self.model,
+                messages=messages,
+                options={"temperature": temperature},
+            )
+            content = response.message.content
+            return (content or "").strip()
         except LLMError:
             raise
         except Exception as e:

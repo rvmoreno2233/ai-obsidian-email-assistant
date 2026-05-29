@@ -15,9 +15,9 @@ Implementing **Email Settings** tab and keyword-triggered auto-response pipeline
 
 ## Current phase
 
-**Active:** Phase 2 — LLM  
-**Agent:** `@email-settings-llm-agent`  
-**Plan file:** `.cursor/plans/active/phase2-email-settings-llm.md`
+**Active:** Phase 3 — Rule engine  
+**Agent:** `@email-settings-engine-agent`  
+**Plan file:** `.cursor/plans/active/phase3-email-settings-rule-engine.md`
 
 ## Progress checklist
 
@@ -33,10 +33,10 @@ Mark `[x]` when a phase is fully done (tests pass, plan moved to `completed/`).
 - [x] **Agent:** `@email-settings-foundation-agent`
 
 ### Phase 2 — LLM
-- [ ] `llm_client.health_check()` + `chat_text()`
-- [ ] `prompts/template_assist.md`, `prompts/template_fill.md`
-- [ ] Mock Ollama tests
-- [ ] **Agent:** `@email-settings-llm-agent`
+- [x] `llm_client.health_check()` + `chat_text()`
+- [x] `prompts/template_assist.md`, `prompts/template_fill.md`
+- [x] Mock Ollama tests
+- [x] **Agent:** `@email-settings-llm-agent`
 
 ### Phase 3 — Rule engine
 - [ ] `app/rule_engine.py` (match, render, fill, process)

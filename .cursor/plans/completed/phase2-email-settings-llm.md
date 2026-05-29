@@ -2,7 +2,8 @@
 
 **Agent:** `@email-settings-llm-agent`  
 **Branch:** `feature/email-settings-auto-response`  
-**Prerequisites:** Phase 1 complete
+**Prerequisites:** Phase 1 complete  
+**Status:** Complete (2026-05-29)
 
 ## Objective
 
@@ -37,11 +38,11 @@ ruff check app/llm_client.py
 
 ## Exit criteria
 
-- [ ] `health_check()` and `chat_text()` implemented with timeouts
-- [ ] Both prompt files committed with clear instructions
-- [ ] Mock Ollama tests pass
-- [ ] Plan moved to `completed/` when done
+- [x] `health_check()` and `chat_text()` implemented with timeouts
+- [x] Both prompt files committed with clear instructions
+- [x] Mock Ollama tests pass
+- [x] Plan moved to `completed/` when done
 
 ## Next phase
 
-→ [phase3-email-settings-rule-engine.md](phase3-email-settings-rule-engine.md) with `@email-settings-engine-agent`
+→ [phase3-email-settings-rule-engine.md](../active/phase3-email-settings-rule-engine.md) with `@email-settings-engine-agent`
