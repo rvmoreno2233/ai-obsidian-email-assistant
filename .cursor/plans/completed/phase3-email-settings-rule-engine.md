@@ -1,8 +1,9 @@
 # Phase 3: Rule Engine — Match, Render, Process, Router Hook
 
 **Agent:** `@email-settings-engine-agent`  
-**Branch:** `feature/email-settings-auto-response`  
-**Prerequisites:** Phases 1–2 complete
+**Branch:** `feat/email-settings-phase3-rule-engine`  
+**Prerequisites:** Phases 1–2 complete  
+**Status:** Complete (2026-05-29)
 
 ## Objective
 
@@ -37,12 +38,12 @@ EMAIL_BACKEND=mock RULE_ENGINE_ENABLED=true python run_local.py
 
 ## Exit criteria
 
-- [ ] Matched emails skip legacy draft and land in queue
-- [ ] Unmatched emails use existing ActionRouter path
-- [ ] LLM fill runs in background-safe context (no poller block — defer to Phase 4 job thread)
-- [ ] All Phase 3 tests pass
-- [ ] Plan moved to `completed/` when done
+- [x] Matched emails skip legacy draft and land in queue
+- [x] Unmatched emails use existing ActionRouter path
+- [x] LLM fill runs in background-safe context (no poller block — defer to Phase 4 job thread)
+- [x] All Phase 3 tests pass
+- [x] Plan moved to `completed/` when done
 
 ## Next phase
 
-→ [phase4-email-settings-api-poller.md](phase4-email-settings-api-poller.md) with `@email-settings-api-agent`
+→ [phase4-email-settings-api-poller.md](../active/phase4-email-settings-api-poller.md) with `@email-settings-api-agent`

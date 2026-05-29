@@ -7,9 +7,11 @@ import logging
 from app.config import AUTO_SEND_MODE, AutoSendMode
 from app.graph_client import EmailBackend
 from app.obsidian_writer import ObsidianWriter
+from app.rule_engine import RuleEngine, RuleEngineResult
 from app.schemas import (
     DraftResponse,
     EmailClassification,
+    EntityMatchResult,
     NormalizedEmail,
     RoutedAction,
 )
@@ -25,17 +27,59 @@ class ActionRouter:
         writer: ObsidianWriter | None,
         backend: EmailBackend,
         auto_send_mode: AutoSendMode | None = None,
+        rule_engine: RuleEngine | None = None,
     ) -> None:
         self.writer = writer
         self.backend = backend
         self.auto_send_mode = auto_send_mode or AUTO_SEND_MODE
+        self.rule_engine = rule_engine
+
+    def _route_rule_match(
+        self,
+        email: NormalizedEmail,
+        classification: EmailClassification,
+        result: RuleEngineResult,
+    ) -> RoutedAction:
+        action = RoutedAction(
+            message_id=email.message_id,
+            rule_matched=True,
+            rule_id=result.rule_id,
+            queue_entry_id=result.queue_entry_id,
+        )
+
+        if result.thread_note:
+            action.notes_written.append(result.thread_note)
+
+        if result.draft_id:
+            action.draft_created = True
+            action.draft_location = result.draft_id
+        elif self.writer:
+            action.draft_location = "Email Assistant/Draft Replies.md"
+
+        if result.rule_id:
+            queue_label = result.queue_name or "approval"
+            action.notifications.append(
+                f"Rule matched ({result.rule_id}) — queued for {queue_label}"
+            )
+
+        if classification.priority in ("high", "urgent"):
+            action.notifications.append(f"High priority: {email.subject}")
+
+        action.errors.extend(result.errors)
+        return action
 
     def route(
         self,
         email: NormalizedEmail,
         classification: EmailClassification,
         draft: DraftResponse,
+        entity_match: EntityMatchResult | None = None,
     ) -> RoutedAction:
+        if self.rule_engine and entity_match is not None:
+            rule_result = self.rule_engine.process_email(email, classification, entity_match)
+            if rule_result and rule_result.matched:
+                return self._route_rule_match(email, classification, rule_result)
+
         action = RoutedAction(message_id=email.message_id)
 
         if self.writer:
