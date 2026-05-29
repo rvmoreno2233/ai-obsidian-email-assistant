@@ -67,6 +67,14 @@ UPDATE_WAITING_YAML = os.getenv("UPDATE_WAITING_YAML", "false").lower() in (
     "yes",
 )
 
+RULE_ENGINE_ENABLED = os.getenv("RULE_ENGINE_ENABLED", "false").lower() in (
+    "1",
+    "true",
+    "yes",
+)
+POLLER_INTERVAL_SECONDS = int(os.getenv("POLLER_INTERVAL_SECONDS", "300"))
+QUEUE_DIR = Path(os.getenv("QUEUE_DIR", str(DATA_DIR / "queue")))
+
 NEWSLETTER_DOMAINS = frozenset(
     {
         "mailchimp.com",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -9,6 +10,37 @@ import yaml
 
 from app.config import DATA_DIR, UPDATE_WAITING_YAML
 from app.schemas import DraftResponse, EmailClassification, NormalizedEmail
+
+_REPLY_PREFIX_RE = re.compile(
+    r"^(\s*(?:re|fw|fwd|aw)\s*:\s*)+",
+    re.IGNORECASE,
+)
+_SLUG_UNSAFE_RE = re.compile(r"[^a-z0-9]+")
+
+
+def _sender_domain(sender_email: str) -> str:
+    if "@" not in sender_email:
+        return "unknown"
+    return sender_email.split("@", 1)[1].lower()
+
+
+def normalize_subject_root(subject: str) -> str:
+    """Strip reply/forward prefixes and return a normalized subject root."""
+    root = subject.strip()
+    while True:
+        stripped = _REPLY_PREFIX_RE.sub("", root).strip()
+        if stripped == root:
+            break
+        root = stripped
+    return root or "no-subject"
+
+
+def thread_slug(email: NormalizedEmail) -> str:
+    """Build thread slug from sender domain and normalized subject root."""
+    domain = _sender_domain(email.sender_email)
+    subject_root = normalize_subject_root(email.subject).lower()
+    subject_part = _SLUG_UNSAFE_RE.sub("-", subject_root).strip("-") or "no-subject"
+    return f"{domain}--{subject_part}"
 
 
 class ObsidianWriter:
@@ -106,6 +138,51 @@ class ObsidianWriter:
             written.append(str(draft_path.relative_to(self.vault_path)))
 
         return written
+
+    def append_to_thread(
+        self,
+        email: NormalizedEmail,
+        classification: EmailClassification,
+        draft: DraftResponse | None = None,
+    ) -> str:
+        """Create or append to a per-thread note under Email Assistant/Threads."""
+        slug = thread_slug(email)
+        path = self._note_path("Email Assistant/Threads", slug)
+        date_str = email.received_at[:10] if len(email.received_at) >= 10 else "unknown"
+        sender = email.sender_name or email.sender_email
+
+        block_lines = [
+            f"### {date_str} — {email.subject}",
+            f"From: [[{classification.contact or sender}]] ({email.sender_email})",
+            f"Category: {classification.category}  ",
+            f"Priority: {classification.priority}  ",
+            "",
+            "Summary:",
+            classification.summary,
+        ]
+        if draft and draft.should_reply:
+            block_lines.extend(
+                [
+                    "",
+                    "Draft reply:",
+                    f"**Subject:** {draft.subject or email.subject}",
+                    "",
+                    draft.body or "(no body)",
+                ]
+            )
+        block = "\n".join(block_lines)
+
+        if not path.exists():
+            path.write_text(
+                f"# Thread: {normalize_subject_root(email.subject)}\n\n"
+                f"Domain: `{_sender_domain(email.sender_email)}`\n\n"
+                f"{block}\n",
+                encoding="utf-8",
+            )
+        else:
+            self._append_section(path, "## Messages", block)
+
+        return str(path.relative_to(self.vault_path))
 
     def mark_waiting_item_complete(self, item_id: str, evidence: str) -> None:
         """Update Waiting For note and close item in waiting_for.yaml."""
