@@ -1,0 +1,17 @@
+---
+description: Standard agent workflow for this repository
+alwaysApply: true
+---
+
+# Agent Workflow
+
+- Use planning before multi-file edits (architect → plan in `.cursor/plans/active/`).
+- Keep one agent session focused on one task.
+- Prefer small diffs.
+- Do not refactor unrelated code.
+- Preserve public behavior unless explicitly asked.
+- Add or update tests with behavior changes.
+- Run the narrowest relevant validation command first.
+- Summarize changed files and test results before finishing.
+- When context becomes noisy, create or update a plan file and start a fresh chat.
+- Use project agents for domain work: `@catalog-agent`, `@graph-agent`, `@pipeline-agent`, etc.

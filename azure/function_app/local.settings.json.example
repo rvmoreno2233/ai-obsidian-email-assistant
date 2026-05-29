@@ -1,0 +1,17 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
+    "EMAIL_BACKEND": "mock",
+    "EMAIL_PROCESSING_QUEUE": "email-processing",
+    "OBSIDIAN_VAULT_PATH": "",
+    "MSGRAPH_CLIENT_ID": "",
+    "MSGRAPH_TENANT_ID": "common",
+    "CLASSIFIER_MODE": "rule",
+    "RESPONDER_MODE": "rule",
+    "OLLAMA_HOST": "http://127.0.0.1:11434",
+    "OLLAMA_MODEL": "llama3.1"
+  }
+}

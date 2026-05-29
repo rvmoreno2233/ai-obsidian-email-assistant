@@ -1,0 +1,92 @@
+[
+  {
+    "message_id": "msg-schema-approval",
+    "subject": "RE: Claims schema - approved",
+    "sender_name": "Jane Doe",
+    "sender_email": "jane.doe@acmehealth.com",
+    "received_at": "2026-05-24T09:00:00Z",
+    "body_text": "Hi, good news — the claims schema has received final approval from our data governance team. The approved data model is attached. Let me know when you can start the SFTP ingestion work.",
+    "web_link": "https://outlook.office.com/mail/msg-schema-approval"
+  },
+  {
+    "message_id": "msg-newsletter",
+    "subject": "50% off this weekend only!",
+    "sender_name": "Deals Weekly",
+    "sender_email": "deals@mailchimp.com",
+    "received_at": "2026-05-24T08:00:00Z",
+    "body_text": "Don't miss our biggest sale of the year. Click here to shop. Unsubscribe from this list.",
+    "web_link": null
+  },
+  {
+    "message_id": "msg-invoice",
+    "subject": "Your invoice #8842 is ready",
+    "sender_name": "Billing",
+    "sender_email": "billing@saasvendor.com",
+    "received_at": "2026-05-23T14:00:00Z",
+    "body_text": "Please find attached your invoice for May 2026. Payment due within 30 days.",
+    "web_link": null
+  },
+  {
+    "message_id": "msg-meeting",
+    "subject": "Teams meeting: Dashboard review",
+    "sender_name": "Mark Lee",
+    "sender_email": "mark.lee@northstaranalytics.com",
+    "received_at": "2026-05-23T11:00:00Z",
+    "body_text": "I'd like to schedule a call to review the Power BI dashboard KPIs. Are you free Tuesday at 2pm?",
+    "web_link": null
+  },
+  {
+    "message_id": "msg-needs-response",
+    "subject": "Question about ETL timeline",
+    "sender_name": "Jane Doe",
+    "sender_email": "jane.doe@acmehealth.com",
+    "received_at": "2026-05-22T16:00:00Z",
+    "body_text": "Can you confirm when the claims file ingestion will be ready? We have a hard deadline next Friday.",
+    "web_link": null
+  },
+  {
+    "message_id": "msg-project-update",
+    "subject": "ETL pipeline status update",
+    "sender_name": "Mark Smith",
+    "sender_email": "mark.smith@acmehealth.com",
+    "received_at": "2026-05-22T10:00:00Z",
+    "body_text": "Quick update on the Acme ingestion: SFTP connection is live and we completed the schema mapping step. Next we need approval to deploy to prod.",
+    "web_link": null
+  },
+  {
+    "message_id": "msg-waiting-northstar",
+    "subject": "Dashboard refresh schedule",
+    "sender_name": "Mark Lee",
+    "sender_email": "mark.lee@northstaranalytics.com",
+    "received_at": "2026-05-21T09:00:00Z",
+    "body_text": "The daily refresh schedule for the executive dashboard is now set to 6am UTC. Data latency should be under 2 hours after source load.",
+    "web_link": null
+  },
+  {
+    "message_id": "msg-fyi",
+    "subject": "FYI: Team offsite next week",
+    "sender_name": "Colleague",
+    "sender_email": "colleague@example.com",
+    "received_at": "2026-05-20T12:00:00Z",
+    "body_text": "Just a heads up that our team will be at an offsite Monday through Wednesday. Responses may be slower.",
+    "web_link": null
+  },
+  {
+    "message_id": "msg-ooo",
+    "subject": "Automatic reply: Out of office",
+    "sender_name": "Support",
+    "sender_email": "support@vendor.com",
+    "received_at": "2026-05-20T08:00:00Z",
+    "body_text": "I am currently out of office with limited access to email. This is an automatic reply.",
+    "web_link": null
+  },
+  {
+    "message_id": "msg-ignore-marketing",
+    "subject": "Join our webinar on AI trends",
+    "sender_name": "Marketing",
+    "sender_email": "promo@beehiiv.com",
+    "received_at": "2026-05-19T15:00:00Z",
+    "body_text": "Register now for our free webinar. Limited seats available. Promo code inside.",
+    "web_link": null
+  }
+]

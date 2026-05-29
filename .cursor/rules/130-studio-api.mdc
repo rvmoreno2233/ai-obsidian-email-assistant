@@ -1,0 +1,37 @@
+---
+description: Email Assistant Studio FastAPI API and UI
+alwaysApply: false
+globs:
+  - app/web/**
+  - docs/STUDIO.md
+---
+
+# Studio API
+
+## Launch
+
+```bash
+email-assistant ui
+```
+
+Default: `http://127.0.0.1:8080`
+
+## Structure
+
+- `app/web/app.py` — FastAPI routes
+- `app/web/jobs.py` — in-memory scrape/apply jobs
+- `app/web/static/` — SPA frontend
+
+## Key endpoints
+
+- `/api/status` — auth and backend status
+- `/api/domains`, `/api/contacts` — catalog CRUD
+- `/api/team` — team config
+- `/api/clients` — config.json client search
+- Job endpoints for scrape and apply
+
+## Rules
+
+- Keep localhost binding as default.
+- Do not expose tokens in API responses.
+- Coordinate catalog changes with `catalog_store.py` patterns.

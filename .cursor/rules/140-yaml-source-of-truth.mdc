@@ -1,0 +1,34 @@
+---
+description: YAML as matching source of truth vs Obsidian vault
+alwaysApply: false
+globs:
+  - data/**
+  - vault/**
+  - app/obsidian_writer.py
+  - app/entity_matcher.py
+---
+
+# YAML Source of Truth
+
+## Matching catalogs (`data/`)
+
+Operational matching uses YAML, not vault Markdown:
+- `data/companies.yaml`
+- `data/contacts.yaml`
+- `data/projects.yaml`
+- `data/waiting_for.yaml`
+
+`entity_matcher.py` reads these files.
+
+## Vault (`vault/`)
+
+Human-readable Obsidian layer:
+- Agent appends summaries via `obsidian_writer.py`
+- Catalog apply generates narrative notes
+- Vault is **not** the matching source of truth
+
+## Rules
+
+- Do not move classification rules into vault files.
+- YAML shape changes require matcher and test updates.
+- Append to vault notes; avoid destructive overwrites.

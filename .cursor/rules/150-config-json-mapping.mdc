@@ -1,0 +1,30 @@
+---
+description: Creo config.json client registry vs team.yaml
+alwaysApply: false
+globs:
+  - config.json
+  - app/config_json.py
+  - config/team.yaml
+  - app/team_config.py
+---
+
+# Config JSON vs Team YAML
+
+## Two separate configs
+
+| File | Purpose | Module |
+|------|---------|--------|
+| `config.json` (repo root) | Creo ETL client registry, 340B IDs, domain→client mapping | `app/config_json.py` |
+| `config/team.yaml` | Shared team settings, categories, domain hints, tenant | `app/team_config.py` |
+
+## Do not merge
+
+- Client abbrev mapping belongs in `config.json`.
+- Category labels and scrape defaults belong in `team.yaml`.
+- Studio exposes both via separate API routes.
+
+## Rules
+
+- Update `config/team.yaml.example` when team schema changes.
+- Treat `config.json` as business-sensitive data.
+- Test client suggest logic in `tests/test_config_json.py`.

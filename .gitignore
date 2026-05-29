@@ -1,0 +1,24 @@
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.pytest_cache/
+.ruff_cache/
+dist/
+*.egg-info/
+.DS_Store
+.azure/
+
+# Local Studio runtime (pid/log from restart script)
+.cursor/runtime/
+
+# Business-sensitive / local-only data
+config.json
+data/catalog/*.yaml
+data/queue/
+
+# Obsidian — personal UI state (do not sync)
+vault/.obsidian/workspace.json
+vault/.obsidian/workspace-mobile.json
+vault/.obsidian/plugins/
+vault/.trash/

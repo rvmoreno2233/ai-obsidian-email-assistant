@@ -1,0 +1,14 @@
+{
+  "clients": [
+    {
+      "client_name": "Example Health System",
+      "client_abbrev": "EXHS",
+      "emr": "Epic",
+      "capture_rx_client_code": "",
+      "wp_client_code": "",
+      "340b_id": "",
+      "verity_abbrev": "",
+      "archive_dir": ""
+    }
+  ]
+}

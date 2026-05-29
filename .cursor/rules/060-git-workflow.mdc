@@ -1,0 +1,13 @@
+---
+description: Git workflow and commit hygiene
+alwaysApply: true
+---
+
+# Git Workflow
+
+- Do not commit unless explicitly asked.
+- Never commit `.env`, tokens, MSAL cache, or `.venv/`.
+- Review `data/catalog/` changes for PII before committing.
+- Prefer focused commits with clear messages.
+- Do not force-push to main/master without explicit approval.
+- Keep `config/team.yaml.example` updated when team schema changes.

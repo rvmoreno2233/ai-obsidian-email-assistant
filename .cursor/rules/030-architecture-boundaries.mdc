@@ -1,0 +1,40 @@
+---
+description: Architecture boundaries between app, data, vault, config, and agents
+alwaysApply: true
+---
+
+# Architecture Boundaries
+
+## Layer separation
+
+| Area | Owns | Do not put here |
+|------|------|-----------------|
+| `app/` | Business logic, Graph, pipeline, web API | Raw YAML edits bypassing store modules |
+| `data/` | Matching catalogs: companies, contacts, projects, waiting_for, inbox catalog | Narrative notes |
+| `vault/` | Obsidian Markdown for humans | Classification rules |
+| `config/` | Shared `team.yaml` (categories, hints, tenant) | Per-user secrets |
+| `agents/` | Per-contact `.policy.md` files | Core pipeline code |
+| `config.json` (root) | Creo client registry / 340B mapping | Team YAML settings |
+
+## Pipelines
+
+**Catalog pipeline:**
+```
+Graph inbox → scrape-inbox → data/catalog/inbox_*.yaml
+         → categorize-domains → apply-catalog → data/*.yaml + vault/ + agents/
+```
+
+**Processing pipeline (`run_local.py`):**
+```
+ingest → match_entities → classify → draft_response → ActionRouter.route()
+```
+
+## Module boundaries
+
+- Graph: `app/graph_client.py`
+- Catalog: `app/inbox_catalog.py`, `catalog_store.py`, `catalog_apply.py`
+- Pipeline: `app/classifier.py`, `entity_matcher.py`, `action_router.py`, `responder.py`
+- Studio: `app/web/`
+- Vault writes: `app/obsidian_writer.py`
+
+Do not rewrite Azure scaffold unless using `azure-agent`.

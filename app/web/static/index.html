@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Email Assistant Studio</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Email Assistant Studio <span id="team-name"></span></h1>
+    </div>
+    <div id="status-badges"></div>
+  </header>
+
+  <nav>
+    <button class="active" data-panel="dashboard">Dashboard</button>
+    <button data-panel="domains">Domains</button>
+    <button data-panel="contacts">Contacts</button>
+    <button data-panel="actions">Actions</button>
+    <button data-panel="settings">Team Settings</button>
+  </nav>
+
+  <main>
+    <!-- Dashboard -->
+    <section id="panel-dashboard" class="panel active">
+      <div class="cards" id="dashboard-cards"></div>
+      <p style="color: var(--muted); font-size: 0.9rem; max-width: 640px;">
+        Categorize sender domains and rank contacts, then apply to generate
+        <code>companies.yaml</code>, Obsidian vault notes, and per-contact agent policies.
+        Share <code>config/team.yaml</code> with your team via Git.
+      </p>
+    </section>
+
+    <!-- Domains -->
+    <section id="panel-domains" class="panel">
+      <div class="layout-with-panel" id="domains-layout">
+        <div>
+          <div class="toolbar">
+            <input type="search" id="domain-search" placeholder="Search domains, subjects, clients…" />
+            <select id="domain-category-filter">
+              <option value="">All categories</option>
+            </select>
+            <label class="filter-toggle">
+              <input type="checkbox" id="domain-hide-excluded" checked />
+              Hide Ignore &amp; Newsletter
+            </label>
+            <select id="domain-bulk-category"></select>
+            <button class="secondary" id="domain-bulk-apply">Apply to selected</button>
+            <span id="domain-count" style="color: var(--muted); margin-left: auto;"></span>
+          </div>
+          <p class="filter-hint">
+            Ignore and Newsletter domains are hidden by default. To include a domain, change its category
+            to Client, Vendor, or another actionable category. Open Preview to map clients and sample emails.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="checkbox-col"><input type="checkbox" id="domain-select-all" /></th>
+                  <th>Domain</th>
+                  <th>Msgs</th>
+                  <th>Category</th>
+                  <th>Client</th>
+                  <th>Company</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="domains-tbody"></tbody>
+            </table>
+          </div>
+          <div class="pagination" id="domains-pagination"></div>
+        </div>
+        <aside class="preview-panel" id="preview-panel">
+          <button class="close-btn secondary" id="preview-close">Close</button>
+          <h3 id="preview-domain-title">Domain</h3>
+          <div id="preview-client-mapped"></div>
+          <div class="toolbar" style="margin-top:0.75rem;">
+            <input type="search" id="client-search" placeholder="Search config.json clients…" style="flex:1;" />
+            <button class="secondary" id="btn-suggest-client">Suggest</button>
+            <button class="secondary" id="btn-refresh-previews">Refresh emails</button>
+          </div>
+          <select id="client-picker" style="width:100%;margin-bottom:0.5rem;">
+            <option value="">— map to config.json client —</option>
+          </select>
+          <button id="btn-map-client" style="width:100%;margin-bottom:1rem;">Map domain → client</button>
+          <ul class="suggest-list" id="suggest-list"></ul>
+          <h4 style="font-size:0.85rem;color:var(--muted);margin:0.75rem 0 0.25rem;">Contacts in this domain</h4>
+          <p class="filter-hint" style="margin-bottom:0.5rem;">
+            Per-contact importance: High = always on · Medium = keyword filtered · Low = ignore.
+          </p>
+          <div id="domain-contacts-list"></div>
+          <h4 style="font-size:0.85rem;color:var(--muted);margin:0.75rem 0 0.5rem;">Sample emails</h4>
+          <div id="preview-emails"></div>
+          <div class="email-detail" id="email-detail" style="display:none;"></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Contacts -->
+    <section id="panel-contacts" class="panel">
+      <div class="toolbar">
+        <input type="search" id="contact-search" placeholder="Search contacts…" />
+        <select id="contact-domain-filter" title="Filter by domain">
+          <option value="">All domains</option>
+        </select>
+        <select id="contact-category-filter">
+          <option value="">All categories</option>
+        </select>
+        <label class="filter-toggle">
+          <input type="checkbox" id="contact-hide-excluded" checked />
+          Hide Ignore &amp; Newsletter
+        </label>
+        <select id="contact-importance-filter">
+          <option value="">All importance</option>
+          <option value="high">High — always on</option>
+          <option value="medium">Medium — keyword filtered</option>
+          <option value="low">Low — ignore</option>
+        </select>
+        <select id="contact-bulk-importance"></select>
+        <button class="secondary" id="contact-bulk-apply">Apply to selected</button>
+        <span id="contact-count" style="color: var(--muted); margin-left: auto;"></span>
+      </div>
+      <p class="filter-hint">
+        Pick an included domain, then set importance per contact or bulk-apply to selected rows.
+        <strong>High</strong> = always on · <strong>Medium</strong> = keyword filtered ·
+        <strong>Low</strong> = ignore this contact (domain stays included).
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="checkbox-col"><input type="checkbox" id="contact-select-all" /></th>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th id="contact-domain-col">Domain</th>
+              <th>Msgs</th>
+              <th>Importance</th>
+            </tr>
+          </thead>
+          <tbody id="contacts-tbody"></tbody>
+        </table>
+      </div>
+      <div class="pagination" id="contacts-pagination"></div>
+    </section>
+
+    <!-- Actions -->
+    <section id="panel-actions" class="panel">
+      <div class="cards">
+        <div class="card">
+          <div class="label">1. Scrape inbox</div>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0.5rem 0;">Pull message history from Outlook</p>
+          <input type="number" id="scrape-pages" value="100" min="1" max="500" style="width:80px;margin-bottom:0.5rem;" />
+          <span style="color:var(--muted);font-size:0.8rem;"> pages (~100 msg each)</span>
+          <br />
+          <button id="btn-scrape" style="margin-top:0.5rem;">Run scrape</button>
+        </div>
+        <div class="card">
+          <div class="label">2. Auto-categorize</div>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0.5rem 0;">Apply team domain hints</p>
+          <button id="btn-categorize">Run categorize</button>
+        </div>
+        <div class="card">
+          <div class="label">3. Apply catalog</div>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0.5rem 0;">Sync vault, agents, companies.yaml</p>
+          <button id="btn-apply">Apply to vault</button>
+        </div>
+      </div>
+      <p style="color:var(--muted);font-size:0.85rem;">
+        CLI auth: run <code>email-assistant authenticate</code> in terminal if Graph is not connected.
+      </p>
+      <div class="job-log" id="job-log"></div>
+    </section>
+
+    <!-- Settings -->
+    <section id="panel-settings" class="panel">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Team name</label>
+          <input type="text" id="set-team-name" />
+        </div>
+        <div class="form-group">
+          <label>Organization</label>
+          <input type="text" id="set-organization" />
+        </div>
+        <div class="form-group">
+          <label>Tenant ID</label>
+          <input type="text" id="set-tenant-id" />
+        </div>
+        <div class="form-group">
+          <label>Vault path</label>
+          <input type="text" id="set-vault-path" />
+        </div>
+        <div class="form-group">
+          <label>Scrape max pages (default)</label>
+          <input type="number" id="set-max-pages" min="1" />
+        </div>
+        <div class="form-group">
+          <label>Max agent policies</label>
+          <input type="number" id="set-max-agents" min="1" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Domain hints (YAML: domain → category)</label>
+        <textarea id="set-domain-hints" placeholder="capturerx.com: 340b_vendor"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Categories (YAML: key → label)</label>
+        <textarea id="set-categories"></textarea>
+      </div>
+      <button id="btn-save-team">Save team config</button>
+      <p style="color:var(--muted);font-size:0.8rem;margin-top:1rem;">
+        Saved to <code>config/team.yaml</code> — commit to Git so teammates inherit categories and hints.
+      </p>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

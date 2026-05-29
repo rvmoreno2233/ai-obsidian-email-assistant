@@ -1,0 +1,31 @@
+---
+description: Privacy, PII, and email data handling
+alwaysApply: false
+globs:
+  - data/catalog/**
+  - app/graph_client.py
+  - app/llm_client.py
+  - app/web/**
+---
+
+# Privacy and PII
+
+## Sensitive data locations
+
+- `data/catalog/inbox_*.yaml` — scraped subjects, senders, previews (PII)
+- `config.json` — client names, 340B IDs
+- Graph message content when `EMAIL_BACKEND=graph`
+- LLM prompts when `CLASSIFIER_MODE=llm` or `RESPONDER_MODE=llm` (local Ollama)
+
+## Safe defaults
+
+- Tests: synthetic fixtures only
+- Tokens: outside repo in MSAL cache
+- Studio: localhost by default
+- Sending: drafts only, `AUTO_SEND_MODE=off`
+
+## Before committing catalog changes
+
+- Review for unnecessary email content
+- Use `@privacy-agent` for large catalog diffs
+- Never commit `.env` or token files

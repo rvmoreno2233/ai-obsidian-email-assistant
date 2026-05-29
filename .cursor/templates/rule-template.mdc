@@ -1,0 +1,15 @@
+---
+description: <Rule description for Cursor>
+alwaysApply: true
+---
+
+# <Rule Title>
+
+- ...
+
+Validation:
+
+```bash
+pytest
+ruff check .
+```

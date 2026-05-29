@@ -1,0 +1,10 @@
+{
+  "alwaysUpdateLinks": true,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "Email Assistant",
+  "promptDelete": true,
+  "showLineNumber": true,
+  "strictLineBreaks": false,
+  "useMarkdownLinks": false,
+  "defaultViewMode": "source"
+}

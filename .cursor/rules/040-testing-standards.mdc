@@ -1,0 +1,25 @@
+---
+description: Testing standards
+alwaysApply: true
+---
+
+# Testing Standards
+
+- Add tests for new behavior.
+- Prefer deterministic unit tests.
+- Avoid real network calls in tests.
+- Avoid production data in tests.
+- Use fixtures for external inputs (`tests/conftest.py`, `tests/fixtures/`).
+- Test failure paths, not only happy paths.
+- Graph tests use `MockGraphBackend` only.
+- Default test env: `EMAIL_BACKEND=mock`, `CLASSIFIER_MODE=rule`.
+
+Commands:
+
+```bash
+pytest
+pytest -v
+email-assistant test
+```
+
+When changing catalogs or matchers, run related test files explicitly.

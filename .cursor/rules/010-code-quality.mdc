@@ -1,0 +1,21 @@
+---
+description: Code quality standards for Python in this repo
+alwaysApply: true
+---
+
+# Code Quality
+
+- Python 3.11+ with type hints where they clarify intent.
+- Pydantic v2 for config and data models.
+- Line length 100 (ruff + black).
+- Prefer existing module patterns over new abstractions.
+- Keep functions focused; avoid drive-by refactors.
+- Use Typer for CLI, FastAPI for web API.
+- YAML I/O goes through Pydantic models in `catalog_store.py` and team config loaders where applicable.
+
+Validation:
+
+```bash
+ruff check .
+black --check .
+```

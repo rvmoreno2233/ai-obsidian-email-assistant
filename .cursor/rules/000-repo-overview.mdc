@@ -1,0 +1,39 @@
+---
+description: Email Assistant Agent repo overview and entry points
+alwaysApply: true
+---
+
+# Email Assistant Agent
+
+Local-first email assistant that classifies Outlook mail via Microsoft Graph, matches YAML catalogs, updates Obsidian notes, and creates reply **drafts only** (MVP does not auto-send).
+
+## Entry points
+
+| Entry | Path | Command |
+|-------|------|---------|
+| CLI | `app/main.py` | `email-assistant` |
+| Local pipeline | `run_local.py` | `EMAIL_BACKEND=mock python run_local.py` |
+| Studio UI | `app/web/app.py` | `email-assistant ui` |
+| Azure (optional) | `azure/function_app/` | Deploy separately |
+
+## Package
+
+- Name: `email-assistant-agent` v0.1.0
+- Python: `>=3.11` (3.12 recommended)
+- Install: `pip install -e ".[dev]"`
+
+## Key env vars
+
+- `EMAIL_BACKEND`: `mock` (default) or `graph`
+- `CLASSIFIER_MODE`: `rule` or `llm`
+- `RESPONDER_MODE`: `rule` or `llm`
+- `AUTO_SEND_MODE`: `off` (MVP default)
+
+## Directory roles
+
+- `app/` — Python application logic
+- `data/` — YAML matching source of truth
+- `vault/` — Obsidian narrative layer
+- `config/` — Shared team YAML (not secrets)
+- `agents/` — Per-contact policy Markdown
+- `tests/` — Pytest with synthetic fixtures

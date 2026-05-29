@@ -1,0 +1,36 @@
+---
+description: Inbox catalog scrape, categorize, and apply pipeline
+alwaysApply: false
+globs:
+  - app/inbox_catalog.py
+  - app/catalog_store.py
+  - app/catalog_apply.py
+  - app/catalog_categorize.py
+  - data/catalog/**
+  - data/domain_categories.yaml
+---
+
+# Inbox Catalog Pipeline
+
+## Flow
+
+1. **Scrape** (`email-assistant scrape-inbox` or Studio job): Graph → `data/catalog/inbox_domains.yaml`, `inbox_contacts.yaml`
+2. **Categorize** (`email-assistant categorize-domains`): rule-based category assignment
+3. **Apply** (`email-assistant apply-catalog`): writes operational catalogs + vault + agent policies
+
+## Key files
+
+- `app/inbox_catalog.py` — scrape logic, `DEFAULT_DOMAIN_HINTS`, category labels
+- `app/catalog_store.py` — Pydantic `DomainRow`, `ContactRow`; load/save/filter
+- `app/catalog_apply.py` — merge into `data/companies.yaml`, `contacts.yaml`, vault, `agents/contacts/`
+- `data/domain_categories.yaml` — synced from `config/team.yaml` domain hints
+
+## Categories
+
+Examples: `340b_vendor`, `client`, `internal`, `newsletter`, `ignore`.
+
+## Rules
+
+- Use Pydantic models for catalog I/O.
+- Preserve idempotent apply semantics.
+- Do not bypass Studio/store APIs with ad-hoc YAML edits in production paths.

@@ -1,0 +1,1185 @@
+contacts:
+- name: Becky Cummins
+  email: becky.cummins@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #1, 1147 messages'
+- name: Mike Morris
+  email: mmorris@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #3, 450 messages'
+- name: Babi Chandamuri
+  email: bc@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #4, 289 messages'
+- name: Shelby Odle
+  email: sodle@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #5, 283 messages'
+- name: Cumulus 4.0 Production (Do not reply)
+  email: cumulus4noreply@capturerx.com
+  company: CaptureRx
+  importance: high
+  agent_enabled: true
+  category: 340b_vendor
+  notes:
+  - 'Rank #6, 271 messages'
+- name: Callie Zaffuto
+  email: czaffuto@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #7, 253 messages'
+- name: ModMed
+  email: no_reply@modmed.com
+  company: ModMed
+  importance: high
+  agent_enabled: true
+  category: partner
+  notes:
+  - 'Rank #8, 244 messages'
+- name: ERIN DEMPSEY
+  email: notificationsecuremessage@appriver.com
+  company: AppRiver secure mail
+  importance: high
+  agent_enabled: true
+  category: partner
+  notes:
+  - 'Rank #9, 231 messages'
+- name: Debbi Ortego
+  email: dortego@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #10, 196 messages'
+- name: Greg Knauber
+  email: gknauber@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #11, 195 messages'
+- name: Reem Mughrabi
+  email: reem@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #12, 177 messages'
+- name: jcurtsinger@creocomp.com
+  email: jcurtsinger@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #13, 173 messages'
+- name: Verity Solutions
+  email: noreply@account.i340b.com
+  company: Verity 340B
+  importance: high
+  agent_enabled: true
+  category: 340b_vendor
+  notes:
+  - 'Rank #14, 162 messages'
+- name: Michael Kirschman
+  email: mkirschman@freegulliver.com
+  company: Freegulliver
+  importance: high
+  agent_enabled: true
+  category: unassigned
+  notes:
+  - 'Rank #15, 150 messages'
+- name: Techvera Service Desk
+  email: help@techvera.com
+  company: Techvera
+  importance: high
+  agent_enabled: true
+  category: partner
+  notes:
+  - 'Rank #17, 146 messages'
+- name: Becky Cummins
+  email: bcummins@creo340b.onmicrosoft.com
+  company: Creo 340B
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #18, 387 messages'
+- name: Keely Byrne
+  email: keely.byrne@entofneworleans.com
+  company: Entofneworleans
+  importance: high
+  agent_enabled: true
+  category: unassigned
+  notes:
+  - 'Rank #19, 112 messages'
+- name: Read Assistant
+  email: executiveassistant@e.read.ai
+  company: E
+  importance: high
+  agent_enabled: true
+  category: unassigned
+  notes:
+  - 'Rank #20, 105 messages'
+- name: CreoVTY
+  email: creovty@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #21, 111 messages'
+- name: Erin Dempsey
+  email: erin.dempsey@capturerx.com
+  company: CaptureRx
+  importance: high
+  agent_enabled: true
+  category: 340b_vendor
+  notes:
+  - 'Rank #22, 90 messages'
+- name: James Bonnet
+  email: james.bonnet@techvera.com
+  company: Techvera
+  importance: high
+  agent_enabled: true
+  category: partner
+  notes:
+  - 'Rank #23, 81 messages'
+- name: Matt Glodowski
+  email: mattglodow@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #24, 80 messages'
+- name: Schroeder, Lauren
+  email: lschroeder@verity340b.com
+  company: Verity 340B
+  importance: high
+  agent_enabled: true
+  category: 340b_vendor
+  notes:
+  - 'Rank #26, 72 messages'
+- name: Price, Ava S
+  email: ava.price@cvshealth.com
+  company: CVS Health
+  importance: high
+  agent_enabled: true
+  category: wholesaler
+  notes:
+  - 'Rank #27, 60 messages'
+- name: Patti Monaghan
+  email: pmonaghan@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #28, 70 messages'
+- name: Jonathan North
+  email: jonathannorth2011@gmail.com
+  company: Personal Gmail
+  importance: high
+  agent_enabled: false
+  category: personal
+  notes:
+  - 'Rank #29, 62 messages'
+- name: Mungo, Helena
+  email: hmungo@verity340b.com
+  company: Verity 340B
+  importance: high
+  agent_enabled: true
+  category: 340b_vendor
+  notes:
+  - 'Rank #30, 54 messages'
+- name: Myrtis Dishmond
+  email: mdishmond@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #31, 62 messages'
+- name: Sidney, Lati S
+  email: lsidney@verity340b.com
+  company: Verity 340B
+  importance: high
+  agent_enabled: true
+  category: 340b_vendor
+  notes:
+  - 'Rank #32, 31 messages'
+- name: Saurabh Nyati
+  email: snyati@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #33, 31 messages'
+- name: Aimee Broussard
+  email: aimee@professionalarts.com
+  company: Professionalarts
+  importance: high
+  agent_enabled: true
+  category: unassigned
+  notes:
+  - 'Rank #34, 39 messages'
+- name: Canva
+  email: marketing@engage.canva.com
+  company: Engage
+  importance: high
+  agent_enabled: true
+  category: unassigned
+  notes:
+  - 'Rank #35, 28 messages'
+- name: no-reply@checkpoint.com
+  email: no-reply@checkpoint.com
+  company: Checkpoint
+  importance: high
+  agent_enabled: true
+  category: unassigned
+  notes:
+  - 'Rank #36, 56 messages'
+- name: Morgan Hebert
+  email: morganhebert@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #37, 39 messages'
+- name: Amy Hall
+  email: amy.hall@capturerx.com
+  company: CaptureRx
+  importance: high
+  agent_enabled: true
+  category: 340b_vendor
+  notes:
+  - 'Rank #38, 36 messages'
+- name: Dropbox
+  email: no-reply@dropbox.com
+  company: Dropbox
+  importance: high
+  agent_enabled: true
+  category: unassigned
+  notes:
+  - 'Rank #39, 25 messages'
+- name: Ralph Moreno
+  email: rmoreno@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #40, 37 messages'
+- name: WeInfuse
+  email: support@weinfuse.com
+  company: Weinfuse
+  importance: high
+  agent_enabled: true
+  category: unassigned
+  notes:
+  - 'Rank #41, 26 messages'
+- name: Hart, Danielle
+  email: dhart@verity340b.com
+  company: Verity 340B
+  importance: high
+  agent_enabled: true
+  category: 340b_vendor
+  notes:
+  - 'Rank #42, 36 messages'
+- name: Alana Lopez
+  email: alana.lopez@capturerx.com
+  company: CaptureRx
+  importance: high
+  agent_enabled: true
+  category: 340b_vendor
+  notes:
+  - 'Rank #43, 33 messages'
+- name: Amanda Rebaldo
+  email: arebaldo@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #44, 35 messages'
+- name: Justin Curtsinger via monday.com
+  email: notifications@monday.com
+  company: Monday
+  importance: high
+  agent_enabled: true
+  category: unassigned
+  notes:
+  - 'Rank #45, 26 messages'
+- name: Amanda Larke
+  email: alarke@creocomp.com
+  company: Creo
+  importance: high
+  agent_enabled: true
+  category: internal
+  notes:
+  - 'Rank #46, 35 messages'
+- name: Gusto
+  email: gustonoreply@gusto.com
+  company: Gusto
+  importance: high
+  agent_enabled: true
+  category: unassigned
+  notes:
+  - 'Rank #47, 21 messages'
+- name: Max Morris
+  email: maxmorrisjr@gmail.com
+  company: Personal Gmail
+  importance: medium
+  agent_enabled: false
+  category: personal
+  notes:
+  - 'Rank #48, 38 messages'
+- name: KAYAK
+  email: kayak@msg.kayak.com
+  company: Msg
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #49, 53 messages'
+- name: HOGAN, KRISTIN
+  email: kristin.hogan@evernorth.com
+  company: Evernorth
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #50, 29 messages'
+- name: activation@sendmail.verity340b.com
+  email: activation@sendmail.verity340b.com
+  company: Verity 340B
+  importance: medium
+  agent_enabled: false
+  category: 340b_vendor
+  notes:
+  - 'Rank #51, 39 messages'
+- name: Lauren Cantrelle
+  email: lauren.cantrelle@entofneworleans.com
+  company: Entofneworleans
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #53, 20 messages'
+- name: Team Twilio
+  email: teamtwilio@team.twilio.com
+  company: Team
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #54, 17 messages'
+- name: Zineb Benslimane
+  email: zbenslimane@creocomp.com
+  company: Creo
+  importance: medium
+  agent_enabled: false
+  category: internal
+  notes:
+  - 'Rank #55, 20 messages'
+- name: Jen Hecht
+  email: jenhecht@bhocpartners.org
+  company: Bhocpartners
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #56, 18 messages'
+- name: Cursor Team
+  email: team@mail.cursor.com
+  company: Mail
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #57, 10 messages'
+- name: Mark Roth
+  email: markroth@creocomp.com
+  company: Creo
+  importance: medium
+  agent_enabled: false
+  category: internal
+  notes:
+  - 'Rank #58, 22 messages'
+- name: Cloudflare
+  email: noreply@notify.cloudflare.com
+  company: Notify
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #59, 19 messages'
+- name: Tyja Alexander
+  email: talexander@impactgbhs.com
+  company: Impactgbhs
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #60, 20 messages'
+- name: Tebra
+  email: no-reply@tebra.com
+  company: Tebra
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #61, 18 messages'
+- name: Saurabh Nyati in Teams
+  email: no-reply@teams.mail.microsoft
+  company: Teams
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #62, 7 messages'
+- name: Jennifer Finucane
+  email: jfinucane@creocomp.com
+  company: Creo
+  importance: medium
+  agent_enabled: false
+  category: internal
+  notes:
+  - 'Rank #63, 19 messages'
+- name: Aaron Broadwell
+  email: abroadwell@rosdrs.com
+  company: Rosdrs
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #64, 19 messages'
+- name: Account Management
+  email: am@creocomp.com
+  company: Creo
+  importance: medium
+  agent_enabled: false
+  category: internal
+  notes:
+  - 'Rank #65, 8 messages'
+- name: Poire, Antonio
+  email: antonio.poire@cvshealth.com
+  company: CVS Health
+  importance: medium
+  agent_enabled: false
+  category: wholesaler
+  notes:
+  - 'Rank #66, 9 messages'
+- name: Microsoft Security
+  email: mssecurity-noreply@microsoft.com
+  company: Microsoft
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #67, 6 messages'
+- name: Ashley Morris
+  email: ashley@guardianhealthclinic.com
+  company: Guardianhealthclinic
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #68, 19 messages'
+- name: Microsoft
+  email: microsoft-noreply@microsoft.com
+  company: Microsoft
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #69, 11 messages'
+- name: Nancy Farrar
+  email: nancy.farrar@thespecialtyalliance.com
+  company: Thespecialtyalliance
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #70, 6 messages'
+- name: Calendly
+  email: notifications@calendly.com
+  company: Calendly
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #71, 17 messages'
+- name: Roshan Koppuzhayil
+  email: roshan@alliedinfusion.com
+  company: Alliedinfusion
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #72, 5 messages'
+- name: Link
+  email: notifications@link.com
+  company: Link
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #73, 3 messages'
+- name: Hilary @ Calendly
+  email: productupdates@send.calendly.com
+  company: Send
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #74, 3 messages'
+- name: Priyam Mistri
+  email: priyammistri2607@gmail.com
+  company: Personal Gmail
+  importance: medium
+  agent_enabled: false
+  category: personal
+  notes:
+  - 'Rank #77, 5 messages'
+- name: Scribe Team
+  email: marketing@scribehow.com
+  company: Scribehow
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #78, 2 messages'
+- name: Scribe Team
+  email: scribeteam@scribe.com
+  company: Scribe
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #79, 2 messages'
+- name: Marriott Bonvoy
+  email: marriottbonvoy@email-marriott.com
+  company: Email Marriott
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #80, 7 messages'
+- name: Hunter, Karen
+  email: karen.hunter@verity340b.com
+  company: Verity 340B
+  importance: medium
+  agent_enabled: false
+  category: 340b_vendor
+  notes:
+  - 'Rank #81, 9 messages'
+- name: Mermaid
+  email: hello@mermaid.ai
+  company: Mermaid
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #82, 1 messages'
+- name: Atlassian
+  email: noreply+6846d79@id.atlassian.com
+  company: Id
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #83, 1 messages'
+- name: Microsoft Azure
+  email: azure@promomail.microsoft.com
+  company: Promomail
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #84, 1 messages'
+- name: Atlassian
+  email: noreply+f81c809@id.atlassian.com
+  company: Id
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #85, 1 messages'
+- name: Scribe
+  email: invoice+statements+acct_1hn1wekh9gpwaqzm@stripe.com
+  company: Stripe
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #86, 1 messages'
+- name: Christene Wheeler
+  email: christene.wheeler@thespecialtyalliance.com
+  company: Thespecialtyalliance
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #87, 2 messages'
+- name: Kristy Milburn
+  email: kristym@brotherspharmacy.com
+  company: Brotherspharmacy
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #88, 1 messages'
+- name: Goins, Terri J
+  email: tgoins@optum.com
+  company: Optum
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #89, 2 messages'
+- name: Thea Narkiewicz
+  email: tnarkiewicz@crescentaddiction.com
+  company: Crescentaddiction
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #90, 12 messages'
+- name: Microsoft Azure
+  email: azure-noreply@microsoft.com
+  company: Microsoft
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #91, 1 messages'
+- name: Kendrick Landix
+  email: klandix@marybird.com
+  company: Marybird
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #92, 21 messages'
+- name: Adi Darsi
+  email: adarsi@gis.md
+  company: Gis
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #93, 9 messages'
+- name: Emily from 340B ESP
+  email: support@340besp.com
+  company: 340Besp
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #94, 6 messages'
+- name: April Chiva
+  email: achiva@creocomp.com
+  company: Creo
+  importance: medium
+  agent_enabled: false
+  category: internal
+  notes:
+  - 'Rank #95, 8 messages'
+- name: Evan Brevelle
+  email: ebrevelle@creocomp.com
+  company: Creo
+  importance: medium
+  agent_enabled: false
+  category: internal
+  notes:
+  - 'Rank #96, 8 messages'
+- name: Melissa Rambin
+  email: mrambin@marybird.com
+  company: Marybird
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #97, 7 messages'
+- name: Verity Solutions
+  email: verity_it_update@verity-solutions.com
+  company: Verity Solutions
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #98, 4 messages'
+- name: Calendly
+  email: teamcalendly@send.calendly.com
+  company: Send
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #99, 20 messages'
+- name: Hogan, Rachel
+  email: rachel.hogan@cardinalhealth.com
+  company: Cardinal Health
+  importance: medium
+  agent_enabled: false
+  category: wholesaler
+  notes:
+  - 'Rank #100, 5 messages'
+- name: Microsoft Power Apps
+  email: powerapps@communication.microsoft.com
+  company: Communication
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #101, 1 messages'
+- name: Mail Delivery Subsystem
+  email: mailer-daemon@googlemail.com
+  company: Googlemail
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #102, 10 messages'
+- name: Microsoft Learn
+  email: learn@mails.microsoft.com
+  company: Mails
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #103, 4 messages'
+- name: Microsoft Audio Conferencing
+  email: maccount@microsoft.com
+  company: Microsoft
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #104, 1 messages'
+- name: Passley, Cristina
+  email: cristina.passley@verity340b.com
+  company: Verity 340B
+  importance: medium
+  agent_enabled: false
+  category: 340b_vendor
+  notes:
+  - 'Rank #105, 9 messages'
+- name: Outlook
+  email: no-reply@outlook.mail.microsoft
+  company: Outlook
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #106, 2 messages'
+- name: April Luna
+  email: april.luna@capturerx.com
+  company: CaptureRx
+  importance: medium
+  agent_enabled: false
+  category: 340b_vendor
+  notes:
+  - 'Rank #107, 2 messages'
+- name: SharePoint Online
+  email: no-reply@sharepointonline.com
+  company: Sharepointonline
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #108, 3 messages'
+- name: Cardinal Health Customer Care
+  email: noreplysfdc@cardinalhealth.com
+  company: Cardinal Health
+  importance: medium
+  agent_enabled: false
+  category: wholesaler
+  notes:
+  - 'Rank #109, 1 messages'
+- name: Nawrocki, Alexander
+  email: anawrocki@bioplusrx.com
+  company: Bioplusrx
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #110, 2 messages'
+- name: Kayla Clark
+  email: kayla.clark@houserx.com
+  company: Houserx
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #111, 2 messages'
+- name: Taylor Vidrine
+  email: tv.acadianapractitioners@gmail.com
+  company: Personal Gmail
+  importance: medium
+  agent_enabled: false
+  category: personal
+  notes:
+  - 'Rank #112, 22 messages'
+- name: Account Team
+  email: account@practicemailer.com
+  company: Practicemailer
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #113, 1 messages'
+- name: Santella, Anthony
+  email: asantella@bioplusrx.com
+  company: Bioplusrx
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #114, 1 messages'
+- name: Trosclair, JP
+  email: jp.trosclair@hattiesburgclinic.com
+  company: Hattiesburgclinic
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #115, 6 messages'
+- name: Maneesh Gupta, MD
+  email: mgupta@acadianagastro.com
+  company: Acadianagastro
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #116, 2 messages'
+- name: Jonathan Gantt
+  email: jgantt@morrisdickson.com
+  company: Morrisdickson
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #117, 1 messages'
+- name: Bryan Johnson
+  email: marketing@weinfuse.com
+  company: Weinfuse
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #118, 1 messages'
+- name: Joe DiGiacomo
+  email: joe@jjdcpa.org
+  company: Jjdcpa
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #119, 1 messages'
+- name: Rodrigues, Jason
+  email: jrodrigues@verity340b.com
+  company: Verity 340B
+  importance: medium
+  agent_enabled: false
+  category: 340b_vendor
+  notes:
+  - 'Rank #120, 4 messages'
+- name: Adil Fatakia
+  email: adil.fatakia@entofneworleans.com
+  company: Entofneworleans
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #121, 22 messages'
+- name: Carson Geving
+  email: cgeving@creocomp.com
+  company: Creo
+  importance: medium
+  agent_enabled: false
+  category: internal
+  notes:
+  - 'Rank #122, 1 messages'
+- name: monday.com
+  email: team@learn.mail.monday.com
+  company: Learn
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #123, 6 messages'
+- name: Ralph Moreno Jr
+  email: rvmoreno2233@gmail.com
+  company: Personal Gmail
+  importance: medium
+  agent_enabled: false
+  category: personal
+  notes:
+  - 'Rank #124, 2 messages'
+- name: Canva
+  email: no-reply@account.canva.com
+  company: Account
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #126, 6 messages'
+- name: Urie, Robert
+  email: rurie@verity340b.com
+  company: Verity 340B
+  importance: medium
+  agent_enabled: false
+  category: 340b_vendor
+  notes:
+  - 'Rank #128, 23 messages'
+- name: Zherebnenko, V
+  email: vera.zherebnenko@cvshealth.com
+  company: CVS Health
+  importance: medium
+  agent_enabled: false
+  category: wholesaler
+  notes:
+  - 'Rank #129, 4 messages'
+- name: Savannah Ridout
+  email: savannah.ridout@capturerx.com
+  company: CaptureRx
+  importance: medium
+  agent_enabled: false
+  category: 340b_vendor
+  notes:
+  - 'Rank #130, 38 messages'
+- name: Shelby Odle
+  email: ent@creocomp.com
+  company: Creo
+  importance: medium
+  agent_enabled: false
+  category: internal
+  notes:
+  - 'Rank #131, 3 messages'
+- name: lazaro@mdmgmtservices.com mdmgmtservices.com [Bracket]
+  email: do.not.reply.with.email@bracket.email
+  company: Bracket
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #132, 5 messages'
+- name: Tasha Cieslak
+  email: tasha@gastroclinic.com
+  company: Gastroclinic
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #133, 13 messages'
+- name: Jodi Conachen
+  email: jconachen@marybird.com
+  company: Marybird
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #134, 2 messages'
+- name: Brett Furr
+  email: brett.furr@taylorporter.com
+  company: Taylorporter
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #135, 2 messages'
+- name: Verity Solutions
+  email: noreply@account-dev.i340b.com
+  company: Verity 340B
+  importance: medium
+  agent_enabled: false
+  category: 340b_vendor
+  notes:
+  - 'Rank #136, 3 messages'
+- name: monday.com
+  email: no_reply@monday.com
+  company: Monday
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #137, 2 messages'
+- name: Saurabh Nyati
+  email: nyati.saurabh189@gmail.com
+  company: Personal Gmail
+  importance: medium
+  agent_enabled: false
+  category: personal
+  notes:
+  - 'Rank #138, 15 messages'
+- name: Sophia Mai
+  email: sophiavmai@gmail.com
+  company: Personal Gmail
+  importance: medium
+  agent_enabled: false
+  category: personal
+  notes:
+  - 'Rank #139, 8 messages'
+- name: mmouse08
+  email: mmouse08@cox.net
+  company: Cox
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #140, 4 messages'
+- name: Jonas Fontenot
+  email: jfontenot@marybird.com
+  company: Marybird
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #141, 1 messages'
+- name: donotreply@sendmail.verity340b.com
+  email: donotreply@sendmail.verity340b.com
+  company: Verity 340B
+  importance: medium
+  agent_enabled: false
+  category: 340b_vendor
+  notes:
+  - 'Rank #142, 14 messages'
+- name: Canva Create HQ
+  email: canvacreate@engage.canva.com
+  company: Engage
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #143, 8 messages'
+- name: Stephanie moga
+  email: smoga@baldonereinadermatology.com
+  company: Baldonereinadermatology
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #144, 14 messages'
+- name: Robinson, Nikki
+  email: nikki.robinson@hattiesburgclinic.com
+  company: Hattiesburgclinic
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #145, 10 messages'
+- name: Derek Ormond
+  email: derek.ormond@senderrarx.com
+  company: Senderrarx
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #146, 2 messages'
+- name: Raneesha Ford
+  email: raneesha@rdf-consulting-group.com
+  company: Rdf Consulting Group
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #147, 3 messages'
+- name: Isa @ Twilio SendGrid
+  email: sendgridteam@sendgrid.com
+  company: Sendgrid
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #148, 3 messages'
+- name: Techvera
+  email: no-reply@techvera.com
+  company: Techvera
+  importance: medium
+  agent_enabled: false
+  category: partner
+  notes:
+  - 'Rank #149, 8 messages'
+- name: Carolyne Graber
+  email: carolyne.graber@capturerx.com
+  company: CaptureRx
+  importance: medium
+  agent_enabled: false
+  category: 340b_vendor
+  notes:
+  - 'Rank #150, 1 messages'
+- name: Matthew Gerardino
+  email: matthew.gerardino@cardio.com
+  company: Cardio
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #151, 30 messages'
+- name: rheumatologyofmetairie
+  email: rheumatologyofmetairie@arthritisandrheumatologyofmetairie.com
+  company: Arthritisandrheumatologyofmetairie
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #152, 20 messages'
+- name: Martin Leahy
+  email: manager@northlakegastro.com
+  company: Northlakegastro
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #153, 20 messages'
+- name: Dorlisa Hills
+  email: dhills@communitybhbr.com
+  company: Communitybhbr
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #154, 1 messages'
+- name: Stacy Overby
+  email: stacy.overby@entofneworleans.com
+  company: Entofneworleans
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #155, 6 messages'
+- name: GoDaddy
+  email: email@e.godaddy.com
+  company: E
+  importance: medium
+  agent_enabled: false
+  category: unassigned
+  notes:
+  - 'Rank #156, 4 messages'

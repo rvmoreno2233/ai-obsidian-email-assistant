@@ -1,0 +1,34 @@
+---
+description: Microsoft Graph and MSAL authentication
+alwaysApply: false
+globs:
+  - app/graph_client.py
+  - app/config.py
+---
+
+# Graph and Auth
+
+## Backend selection
+
+- `EMAIL_BACKEND=mock` — uses fixtures, no network (default for dev/tests)
+- `EMAIL_BACKEND=graph` — live Microsoft Graph via MSAL
+
+## Authentication
+
+- Public client + device code flow
+- Scopes: `Mail.Read`, `Mail.ReadWrite`, `offline_access`
+- Token cache: `~/.cache/email-assistant/msal_cache.json`
+- CLI auth: `email-assistant authenticate`
+- Requires `MSGRAPH_CLIENT_ID` in `.env`
+
+## Protocol
+
+`EmailBackend` in `app/graph_client.py`:
+- `MockGraphBackend` for tests
+- `MsGraphBackend` for production
+
+## Rules
+
+- Never commit tokens or cache files.
+- Tests must use mock backend only.
+- Draft creation only in MVP — no auto-send.

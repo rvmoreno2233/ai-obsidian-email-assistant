@@ -1,0 +1,46 @@
+# Team configuration — copy to team.yaml and customize per organization.
+# Commit team.yaml to share categories and domain hints across your team.
+# Each teammate still uses their own .env for MSGRAPH_CLIENT_ID.
+
+team_name: Creo 340B
+organization: Creo
+
+# Microsoft Entra tenant (shared for work/school accounts)
+tenant_id: 5c06fe0d-d83c-4e82-8f11-43b3e0b6acf0
+
+# Relative to repo root
+vault_path: vault
+data_dir: data
+
+scrape_defaults:
+  max_pages: 100
+  page_size: 100
+
+agent_defaults:
+  max_agents: 25
+  min_messages_for_company: 3
+
+# Category labels shown in the UI (key → display name)
+categories:
+  340b_vendor: "340B vendor"
+  pharmacy: Pharmacy
+  wholesaler: Wholesaler
+  internal: Internal
+  client: Client / covered entity
+  partner: Partner
+  newsletter: Newsletter / marketing
+  personal: Personal
+  ignore: Ignore / low priority
+  unassigned: Unassigned
+
+# Domain substring → category (applied on scrape & categorize)
+domain_hints:
+  capturerx.com: 340b_vendor
+  verity340b.com: 340b_vendor
+  i340b.com: 340b_vendor
+  cervey.com: 340b_vendor
+  creocomp.com: internal
+  creo340b.onmicrosoft.com: internal
+  cardinalhealth.com: wholesaler
+  cardinal.com: wholesaler
+  cvshealth.com: wholesaler

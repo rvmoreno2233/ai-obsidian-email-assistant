@@ -1,0 +1,402 @@
+:root {
+  --bg: #0f1419;
+  --surface: #1a2332;
+  --surface2: #243044;
+  --border: #2d3a4f;
+  --text: #e7ecf3;
+  --muted: #8b9cb3;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --radius: 8px;
+  --font: "Inter", system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+header h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+header h1 span { color: var(--muted); font-weight: 400; font-size: 0.9rem; }
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+}
+
+.badge.ok { border-color: var(--success); color: var(--success); }
+.badge.warn { border-color: var(--warning); color: var(--warning); }
+
+nav {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0 1.5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+
+nav button {
+  background: none;
+  border: none;
+  color: var(--muted);
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  border-bottom: 2px solid transparent;
+}
+
+nav button:hover { color: var(--text); }
+nav button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+main { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+.card .label { font-size: 0.8rem; color: var(--muted); }
+.card .value { font-size: 1.75rem; font-weight: 600; margin-top: 0.25rem; }
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.filter-hint {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin: -0.5rem 0 1rem;
+  max-width: 720px;
+}
+
+input, select, textarea {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+input[type="search"] { min-width: 220px; }
+
+button, .btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+button:hover { background: var(--accent-hover); }
+button.secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+button.secondary:hover { background: var(--border); }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+th, td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  background: var(--surface2);
+  color: var(--muted);
+  font-weight: 500;
+  position: sticky;
+  top: 0;
+}
+
+tr:hover td { background: rgba(59, 130, 246, 0.05); }
+
+td select { width: 100%; min-width: 120px; padding: 0.35rem; }
+td input[type="text"] { width: 100%; min-width: 100px; padding: 0.35rem; }
+
+.checkbox-col { width: 36px; }
+
+.pagination {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.layout-with-panel {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.layout-with-panel.panel-open {
+  grid-template-columns: 1fr 420px;
+}
+
+.preview-panel {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  position: sticky;
+  top: 1rem;
+}
+
+.preview-panel.open { display: block; }
+
+.preview-panel h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  word-break: break-all;
+}
+
+.preview-panel .close-btn {
+  float: right;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.domain-contacts-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  margin-bottom: 0.75rem;
+}
+
+.domain-contacts-table th,
+.domain-contacts-table td {
+  padding: 0.35rem 0.25rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.domain-contacts-table th {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.domain-contacts-table select {
+  width: 100%;
+  min-width: 7rem;
+  font-size: 0.75rem;
+  padding: 0.25rem;
+}
+
+.domain-contacts-table .contact-email {
+  word-break: break-all;
+  max-width: 9rem;
+}
+
+#contact-domain-filter {
+  min-width: 11rem;
+  max-width: 18rem;
+}
+
+.email-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+}
+
+.email-card:hover { border-color: var(--accent); }
+.email-card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+
+.email-card .subject {
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+.email-card .meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+}
+
+.email-card .body {
+  font-size: 0.8rem;
+  color: var(--text);
+  white-space: pre-wrap;
+  max-height: 120px;
+  overflow: hidden;
+}
+
+.email-detail {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  margin: 1rem 0;
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.suggest-list {
+  list-style: none;
+  margin: 0.5rem 0;
+}
+
+.suggest-list li {
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 0.35rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.suggest-list li:hover { border-color: var(--accent); }
+
+.client-mapped {
+  color: var(--success);
+  font-size: 0.85rem;
+  margin: 0.5rem 0;
+}
+
+@media (max-width: 1100px) {
+  .layout-with-panel.panel-open { grid-template-columns: 1fr; }
+  .preview-panel { max-height: none; position: static; }
+}
+
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  z-index: 100;
+  display: none;
+}
+
+.toast.show { display: block; }
+.toast.error { border-color: var(--danger); }
+
+.job-log {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.job-log .job-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.job-log .job-item:last-child { border-bottom: none; }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.form-group { margin-bottom: 1rem; }
+
+textarea { width: 100%; min-height: 120px; font-family: monospace; font-size: 0.8rem; }
+
+@media (max-width: 768px) {
+  .form-grid { grid-template-columns: 1fr; }
+}

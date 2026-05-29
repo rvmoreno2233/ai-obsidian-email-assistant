@@ -1,0 +1,21 @@
+categories:
+  340b_vendor: "340B vendor (CaptureRx, Verity, Cervey, etc.)"
+  pharmacy: "Pharmacy (retail, specialty, mail-order)"
+  wholesaler: "Wholesaler (Cardinal Health, etc.)"
+  internal: "Internal — Creo"
+  client: "Client / covered entity"
+  partner: "Partner / vendor (other)"
+  newsletter: "Newsletter / marketing / noreply"
+  personal: "Personal"
+  ignore: "Ignore / low priority"
+  unassigned: "Unassigned — edit inbox_domains.yaml"
+
+# Domain substring hints applied during scrape (auto-suggest category)
+hints:
+  capturerx.com: 340b_vendor
+  verity340b.com: 340b_vendor
+  i340b.com: 340b_vendor
+  cervey.com: 340b_vendor
+  creocomp.com: internal
+  cardinalhealth.com: wholesaler
+  cardinal.com: wholesaler
