@@ -15,22 +15,22 @@ Implementing **Email Settings** tab and keyword-triggered auto-response pipeline
 
 ## Current phase
 
-**Active:** `[PHASE N — name]`  
-**Agent:** `@[agent-name]`  
-**Plan file:** `.cursor/plans/active/phase[N]-email-settings-*.md`
+**Active:** Phase 2 — LLM  
+**Agent:** `@email-settings-llm-agent`  
+**Plan file:** `.cursor/plans/active/phase2-email-settings-llm.md`
 
 ## Progress checklist
 
 Mark `[x]` when a phase is fully done (tests pass, plan moved to `completed/`).
 
 ### Phase 1 — Foundation
-- [ ] `app/email_rules.py` (models + YAML I/O)
-- [ ] `app/response_queue.py` (JSONL queues)
-- [ ] `app/obsidian_writer.append_to_thread`
-- [ ] Config: `RULE_ENGINE_ENABLED`, `POLLER_INTERVAL_SECONDS`, `QUEUE_DIR`
-- [ ] `.gitignore` includes `data/queue/`
-- [ ] Tests: `test_email_rules_yaml`, `test_response_queue`, thread note tests
-- [ ] **Agent:** `@email-settings-foundation-agent`
+- [x] `app/email_rules.py` (models + YAML I/O)
+- [x] `app/response_queue.py` (JSONL queues)
+- [x] `app/obsidian_writer.append_to_thread`
+- [x] Config: `RULE_ENGINE_ENABLED`, `POLLER_INTERVAL_SECONDS`, `QUEUE_DIR`
+- [x] `.gitignore` includes `data/queue/`
+- [x] Tests: `test_email_rules_yaml`, `test_response_queue`, thread note tests
+- [x] **Agent:** `@email-settings-foundation-agent`
 
 ### Phase 2 — LLM
 - [ ] `llm_client.health_check()` + `chat_text()`

@@ -42,3 +42,11 @@ def data_dir(tmp_path: Path) -> Path:
         if src.exists():
             (dest / name).write_text(src.read_text(encoding="utf-8"))
     return dest
+
+
+@pytest.fixture
+def tmp_queue_dir(tmp_path: Path) -> Path:
+    """Temporary queue directory for response queue tests."""
+    queue_dir = tmp_path / "queue"
+    queue_dir.mkdir()
+    return queue_dir

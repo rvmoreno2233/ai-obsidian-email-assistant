@@ -2,7 +2,8 @@
 
 **Agent:** `@email-settings-foundation-agent`  
 **Branch:** `feature/email-settings-auto-response`  
-**Prerequisites:** Origin published on `main`
+**Prerequisites:** Origin published on `main`  
+**Status:** Complete (2026-05-29)
 
 ## Objective
 
@@ -41,12 +42,12 @@ black --check app/email_rules.py app/response_queue.py
 
 ## Exit criteria
 
-- [ ] Models validate example YAML from master plan
-- [ ] Queue persists across reload; `data/queue/` gitignored
-- [ ] Thread slug from `(sender_domain, normalized subject root)`
-- [ ] All Phase 1 tests pass
-- [ ] Plan moved to `completed/` when done
+- [x] Models validate example YAML from master plan
+- [x] Queue persists across reload; `data/queue/` gitignored
+- [x] Thread slug from `(sender_domain, normalized subject root)`
+- [x] All Phase 1 tests pass
+- [x] Plan moved to `completed/` when done
 
 ## Next phase
 
-→ [phase2-email-settings-llm.md](phase2-email-settings-llm.md) with `@email-settings-llm-agent`
+→ [phase2-email-settings-llm.md](../active/phase2-email-settings-llm.md) with `@email-settings-llm-agent`
