@@ -77,6 +77,9 @@ class RoutedAction(BaseModel):
     notifications: list[str] = Field(default_factory=list)
     waiting_items_closed: list[str] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)
+    rule_matched: bool = False
+    rule_id: Optional[str] = None
+    queue_entry_id: Optional[str] = None
 
 
 # --- YAML catalog models ---

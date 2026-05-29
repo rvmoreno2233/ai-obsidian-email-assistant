@@ -6,7 +6,7 @@ Copy this prompt when starting a new chat or phase. Replace `[PHASE N]` and chec
 
 ## Context
 
-Implementing **Email Settings** tab and keyword-triggered auto-response pipeline on branch `feature/email-settings-auto-response`.
+Implementing **Email Settings** tab and keyword-triggered auto-response pipeline on branch `feat/email-settings-phase3-rule-engine`.
 
 - **Master plan:** `.cursor/plans/active/email-settings-master.md`
 - **Architect source:** `.cursor/plans/email_settings_auto-response_b94c774f.plan.md`
@@ -15,9 +15,9 @@ Implementing **Email Settings** tab and keyword-triggered auto-response pipeline
 
 ## Current phase
 
-**Active:** Phase 3 — Rule engine  
-**Agent:** `@email-settings-engine-agent`  
-**Plan file:** `.cursor/plans/active/phase3-email-settings-rule-engine.md`
+**Active:** Phase 4 — API & poller  
+**Agent:** `@email-settings-api-agent`  
+**Plan file:** `.cursor/plans/active/phase4-email-settings-api-poller.md`
 
 ## Progress checklist
 
@@ -39,10 +39,10 @@ Mark `[x]` when a phase is fully done (tests pass, plan moved to `completed/`).
 - [x] **Agent:** `@email-settings-llm-agent`
 
 ### Phase 3 — Rule engine
-- [ ] `app/rule_engine.py` (match, render, fill, process)
-- [ ] `action_router.py` hook (rule engine first)
-- [ ] `tests/test_rule_engine.py`
-- [ ] **Agent:** `@email-settings-engine-agent`
+- [x] `app/rule_engine.py` (match, render, fill, process)
+- [x] `action_router.py` hook (rule engine first)
+- [x] `tests/test_rule_engine.py`
+- [x] **Agent:** `@email-settings-engine-agent`
 
 ### Phase 4 — API & poller
 - [ ] `app/web/poller.py` + lifespan wiring
