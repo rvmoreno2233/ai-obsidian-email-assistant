@@ -35,11 +35,11 @@ email-assistant ui
 
 ## Exit criteria
 
-- [ ] Nav tab switches to Email Settings panel
-- [ ] CRUD for templates and rules works end-to-end
-- [ ] Process-now triggers job; approval queue refreshes
-- [ ] STUDIO.md updated
-- [ ] Plan moved to `completed/` when done
+- [x] Nav tab switches to Email Settings panel
+- [x] CRUD for templates and rules works end-to-end
+- [x] Process-now triggers job; approval queue refreshes
+- [x] STUDIO.md updated
+- [x] Plan moved to `completed/` when done
 
 ## Next phase
 
