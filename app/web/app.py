@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import time
+import uuid
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
@@ -20,18 +23,48 @@ from app.catalog_store import (
     get_domain,
     load_contacts,
     load_domains,
-    save_domains,
     update_contact,
     update_domain,
 )
+from app.config import DATA_DIR, MSAL_CACHE_PATH, MSGRAPH_CLIENT_ID, PROJECT_ROOT, PROMPTS_DIR
+from app.email_rules import (
+    EmailRule,
+    ResponseTemplate,
+    add_rule,
+    add_template,
+    delete_rule,
+    delete_template,
+    load_rules,
+    load_templates,
+    update_rule,
+    update_template,
+)
 from app.inbox_catalog import CONTACT_IMPORTANCE_LABELS, DEFAULT_EXCLUDED_CATEGORIES
-from app.config import DATA_DIR, MSGRAPH_CLIENT_ID, MSAL_CACHE_PATH, PROJECT_ROOT
-from app.team_config import TeamConfig, load_team_config, save_team_config, sync_hints_to_domain_categories
-from app.web.jobs import JobStatus, create_job, get_job, list_jobs
+from app.llm_client import LLMConnectionError, OllamaClient
+from app.response_queue import ResponseQueueStore
+from app.team_config import (
+    TeamConfig,
+    load_team_config,
+    save_team_config,
+    sync_hints_to_domain_categories,
+)
+from app.web.jobs import create_job, get_job, list_jobs
+from app.web.poller import BackgroundPoller
 
 STATIC_DIR = Path(__file__).parent / "static"
 
-app = FastAPI(title="Email Assistant Studio", version="0.1.0")
+_queue_store = ResponseQueueStore()
+_poller = BackgroundPoller(queue_store=_queue_store)
+
+
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    await _poller.start()
+    yield
+    await _poller.stop()
+
+
+app = FastAPI(title="Email Assistant Studio", version="0.1.0", lifespan=_lifespan)
 
 
 class DomainPatch(BaseModel):
@@ -440,6 +473,251 @@ def api_job(job_id: str) -> dict[str, Any]:
         "error": job.error,
         "result": job.result,
     }
+
+
+# --- Email Settings: Ollama ---
+
+
+@app.get("/api/ollama/health")
+def api_ollama_health() -> dict[str, Any]:
+    return OllamaClient().health_check()
+
+
+class OllamaTestRequest(BaseModel):
+    prompt: str = "Reply with exactly: ok"
+
+
+@app.post("/api/ollama/test")
+def api_ollama_test(body: OllamaTestRequest) -> dict[str, Any]:
+    client = OllamaClient()
+    started = time.perf_counter()
+    try:
+        reply = client.chat_text(messages=[{"role": "user", "content": body.prompt}])
+    except LLMConnectionError as exc:
+        raise HTTPException(503, str(exc)) from exc
+    elapsed_ms = round((time.perf_counter() - started) * 1000, 1)
+    return {"ok": True, "latency_ms": elapsed_ms, "reply": reply[:500]}
+
+
+# --- Email Settings: Templates ---
+
+
+class TemplateCreate(BaseModel):
+    name: str
+    subject_prefix: str = "Re: "
+    body: str = ""
+    ai_instructions: str = ""
+    created_by: str = "manual"
+
+
+class TemplatePatch(BaseModel):
+    name: str | None = None
+    subject_prefix: str | None = None
+    body: str | None = None
+    ai_instructions: str | None = None
+    created_by: str | None = None
+
+
+class TemplateAiAssistRequest(BaseModel):
+    description: str
+    team_name: str | None = None
+
+
+@app.get("/api/templates")
+def api_list_templates() -> dict[str, Any]:
+    catalog = load_templates()
+    return {"items": [t.model_dump() for t in catalog.templates]}
+
+
+@app.post("/api/templates")
+def api_create_template(body: TemplateCreate) -> dict[str, Any]:
+    template_id = f"tpl_{uuid.uuid4().hex[:10]}"
+    template = ResponseTemplate(id=template_id, **body.model_dump())
+    try:
+        add_template(template)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return template.model_dump()
+
+
+@app.patch("/api/templates/{template_id}")
+def api_patch_template(template_id: str, patch: TemplatePatch) -> dict[str, Any]:
+    data = patch.model_dump(exclude_none=True)
+    if not data:
+        raise HTTPException(400, "No fields to update")
+    updated = update_template(template_id, data)
+    if not updated:
+        raise HTTPException(404, f"Template not found: {template_id}")
+    return updated.model_dump()
+
+
+@app.delete("/api/templates/{template_id}")
+def api_delete_template(template_id: str) -> dict[str, str]:
+    if not delete_template(template_id):
+        raise HTTPException(404, f"Template not found: {template_id}")
+    return {"message": "Template deleted"}
+
+
+@app.post("/api/templates/ai-assist")
+def api_template_ai_assist(body: TemplateAiAssistRequest) -> dict[str, str]:
+    team = body.team_name or load_team_config().team_name
+    prompt_path = PROMPTS_DIR / "template_assist.md"
+    prompt = prompt_path.read_text(encoding="utf-8")
+    prompt = prompt.replace("{description}", body.description)
+    prompt = prompt.replace("{team_name}", team)
+    client = OllamaClient()
+    try:
+        body_text = client.chat_text(messages=[{"role": "user", "content": prompt}])
+    except LLMConnectionError as exc:
+        raise HTTPException(503, str(exc)) from exc
+
+    ai_instructions = ""
+    if "AI instructions:" in body_text:
+        main, _, tail = body_text.partition("AI instructions:")
+        body_text = main.strip()
+        ai_instructions = tail.strip()
+    return {"body": body_text, "ai_instructions": ai_instructions}
+
+
+# --- Email Settings: Rules ---
+
+
+class RuleCreate(BaseModel):
+    name: str
+    enabled: bool = True
+    match: dict[str, Any] = Field(default_factory=dict)
+    template_id: str
+    generation: str = "canned"
+    delivery: str = "approval"
+    append_to_existing_note: bool = True
+
+
+class RulePatch(BaseModel):
+    name: str | None = None
+    enabled: bool | None = None
+    match: dict[str, Any] | None = None
+    template_id: str | None = None
+    generation: str | None = None
+    delivery: str | None = None
+    append_to_existing_note: bool | None = None
+
+
+@app.get("/api/rules")
+def api_list_rules() -> dict[str, Any]:
+    catalog = load_rules()
+    return {"items": [r.model_dump() for r in catalog.rules]}
+
+
+@app.post("/api/rules")
+def api_create_rule(body: RuleCreate) -> dict[str, Any]:
+    rule_id = f"rule_{uuid.uuid4().hex[:10]}"
+    payload = body.model_dump()
+    match_data = payload.pop("match", {})
+    rule = EmailRule(id=rule_id, match=match_data, **payload)
+    try:
+        add_rule(rule)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc)) from exc
+    return rule.model_dump()
+
+
+@app.patch("/api/rules/{rule_id}")
+def api_patch_rule(rule_id: str, patch: RulePatch) -> dict[str, Any]:
+    data = patch.model_dump(exclude_none=True)
+    if not data:
+        raise HTTPException(400, "No fields to update")
+    updated = update_rule(rule_id, data)
+    if not updated:
+        raise HTTPException(404, f"Rule not found: {rule_id}")
+    return updated.model_dump()
+
+
+@app.delete("/api/rules/{rule_id}")
+def api_delete_rule(rule_id: str) -> dict[str, str]:
+    if not delete_rule(rule_id):
+        raise HTTPException(404, f"Rule not found: {rule_id}")
+    return {"message": "Rule deleted"}
+
+
+# --- Email Settings: Poller & process-now ---
+
+
+class PollerPatch(BaseModel):
+    enabled: bool | None = None
+    interval_seconds: int | None = Field(default=None, ge=30, le=86400)
+
+
+@app.get("/api/email-settings/poller")
+def api_get_poller() -> dict[str, Any]:
+    return _poller.get_state().model_dump()
+
+
+@app.put("/api/email-settings/poller")
+def api_put_poller(patch: PollerPatch) -> dict[str, Any]:
+    state = _poller.get_state()
+    data = patch.model_dump(exclude_none=True)
+    if not data:
+        raise HTTPException(400, "No fields to update")
+    updated = state.model_copy(update=data)
+    _poller.save_state(updated)
+    return updated.model_dump()
+
+
+class ProcessNowRequest(BaseModel):
+    top: int = Field(default=25, ge=1, le=200)
+
+
+@app.post("/api/email-settings/process-now")
+def api_process_now(req: ProcessNowRequest) -> dict[str, str]:
+    def _task() -> dict[str, Any]:
+        from app.inbox_processor import process_inbox
+
+        state = _poller.get_state()
+        result = process_inbox(top=req.top, since_message_id=state.last_processed_message_id)
+        state.last_run = _queue_store.utc_now()
+        state.last_processed_count = result.processed
+        if result.last_message_id:
+            state.last_processed_message_id = result.last_message_id
+        _poller.save_state(state)
+        payload = result.as_dict()
+        payload["message"] = f"Processed {result.processed} email(s)"
+        return payload
+
+    job = create_job("process-inbox", _task)
+    return {"job_id": job.id}
+
+
+# --- Email Settings: Queues ---
+
+
+@app.get("/api/queue/approval")
+def api_queue_approval(status: str = "") -> dict[str, Any]:
+    items = _queue_store.list_entries("approval")
+    if status:
+        items = [item for item in items if item.status == status]
+    return {"items": [item.model_dump() for item in items]}
+
+
+@app.post("/api/queue/approval/{entry_id}/approve")
+def api_queue_approve(entry_id: str) -> dict[str, Any]:
+    updated = _queue_store.update_status("approval", entry_id, "approved")
+    if not updated:
+        raise HTTPException(404, f"Queue entry not found: {entry_id}")
+    return updated.model_dump()
+
+
+@app.post("/api/queue/approval/{entry_id}/reject")
+def api_queue_reject(entry_id: str) -> dict[str, Any]:
+    updated = _queue_store.update_status("approval", entry_id, "rejected")
+    if not updated:
+        raise HTTPException(404, f"Queue entry not found: {entry_id}")
+    return updated.model_dump()
+
+
+@app.get("/api/queue/auto")
+def api_queue_auto() -> dict[str, Any]:
+    items = _queue_store.list_entries("auto")
+    return {"items": [item.model_dump() for item in items]}
 
 
 @app.get("/")

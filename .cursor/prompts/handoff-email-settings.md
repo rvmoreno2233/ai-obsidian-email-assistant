@@ -6,7 +6,7 @@ Copy this prompt when starting a new chat or phase. Replace `[PHASE N]` and chec
 
 ## Context
 
-Implementing **Email Settings** tab and keyword-triggered auto-response pipeline on branch `feat/email-settings-phase3-rule-engine`.
+Implementing **Email Settings** tab and keyword-triggered auto-response pipeline on branch `feat/email-settings-phase4-api-poller`.
 
 - **Master plan:** `.cursor/plans/active/email-settings-master.md`
 - **Architect source:** `.cursor/plans/email_settings_auto-response_b94c774f.plan.md`
@@ -15,9 +15,9 @@ Implementing **Email Settings** tab and keyword-triggered auto-response pipeline
 
 ## Current phase
 
-**Active:** Phase 4 — API & poller  
-**Agent:** `@email-settings-api-agent`  
-**Plan file:** `.cursor/plans/active/phase4-email-settings-api-poller.md`
+**Active:** Phase 5 — UI  
+**Agent:** `@email-settings-ui-agent`  
+**Plan file:** `.cursor/plans/active/phase5-email-settings-ui.md`
 
 ## Progress checklist
 
@@ -45,10 +45,10 @@ Mark `[x]` when a phase is fully done (tests pass, plan moved to `completed/`).
 - [x] **Agent:** `@email-settings-engine-agent`
 
 ### Phase 4 — API & poller
-- [ ] `app/web/poller.py` + lifespan wiring
-- [ ] All `/api/ollama`, `/api/templates`, `/api/rules`, `/api/email-settings`, `/api/queue` routes
-- [ ] API/poller tests
-- [ ] **Agent:** `@email-settings-api-agent`
+- [x] `app/web/poller.py` + lifespan wiring
+- [x] All `/api/ollama`, `/api/templates`, `/api/rules`, `/api/email-settings`, `/api/queue` routes
+- [x] API/poller tests
+- [x] **Agent:** `@email-settings-api-agent`
 
 ### Phase 5 — UI
 - [ ] Email Settings nav + panel in `index.html`
