@@ -105,5 +105,48 @@ def authenticate() -> None:
     typer.echo(f"Authenticated successfully (token length: {len(token)})")
 
 
+@app.command("sync-knowledge")
+def sync_knowledge_cmd(
+    max_pages: int = typer.Option(50, "--max-pages", help="Inbox pages to scan (100 msgs/page)"),
+    page_size: int = typer.Option(100, "--page-size", help="Messages per page (max 100)"),
+    no_recontext: bool = typer.Option(
+        False, "--no-recontext", help="Skip LLM summarization for new mail"
+    ),
+) -> None:
+    """Copy approved-domain emails into the local knowledge index."""
+    import os
+
+    from app.email_knowledge import knowledge_stats, sync_knowledge
+    from app.graph_client import get_email_backend
+
+    backend = get_email_backend()
+    if os.getenv("EMAIL_BACKEND", "mock").lower() == "mock":
+        typer.echo("Mock backend: syncing from fixtures only.")
+        from app.email_knowledge import sync_knowledge_from_fixture
+        from app.graph_client import MockGraphBackend
+
+        emails = MockGraphBackend().list_recent_messages(top=max_pages * page_size)
+        result = sync_knowledge_from_fixture(
+            emails,
+            recontextualize_new=not no_recontext,
+        )
+    else:
+        result = sync_knowledge(
+            backend=backend,
+            max_pages=max_pages,
+            page_size=page_size,
+            recontextualize_new=not no_recontext,
+        )
+    stats = knowledge_stats()
+    typer.echo(
+        f"Done: scanned={result.scanned} added={result.added} "
+        f"recontextualized={result.recontextualized} total_indexed={stats['entry_count']}"
+    )
+    if result.errors:
+        typer.echo(f"Errors ({len(result.errors)}):")
+        for err in result.errors[:5]:
+            typer.echo(f"  {err}")
+
+
 if __name__ == "__main__":
     app()

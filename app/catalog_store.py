@@ -56,6 +56,8 @@ class ContactRow(BaseModel):
     first_seen: str = ""
     last_seen: str = ""
     sample_subjects: list[str] = Field(default_factory=list)
+    sample_emails: list[SampleEmailRow] = Field(default_factory=list)
+    key_phrases: list[str] = Field(default_factory=list)
 
 
 class DomainCatalog(BaseModel):
@@ -116,6 +118,46 @@ def get_domain(domain: str) -> DomainRow | None:
         if row.domain == domain:
             return row
     return None
+
+
+def get_contact(email: str) -> ContactRow | None:
+    catalog = load_contacts()
+    key = email.lower()
+    for row in catalog.contacts:
+        if row.email.lower() == key:
+            return row
+    return None
+
+
+def refresh_contact_previews(email: str, limit: int = 5) -> list[SampleEmailRow]:
+    """Fetch live email previews from Graph for a sender and save to catalog."""
+    from app.graph_client import get_email_backend
+
+    backend = get_email_backend()
+    if not hasattr(backend, "list_messages_for_sender"):
+        raise RuntimeError("Backend does not support list_messages_for_sender")
+    messages = backend.list_messages_for_sender(email, top=limit)
+    previews = [
+        SampleEmailRow(
+            message_id=m.message_id,
+            subject=m.subject,
+            sender_email=m.sender_email,
+            sender_name=m.sender_name,
+            received_at=m.received_at,
+            body_preview=(m.body_text or "")[:500],
+        )
+        for m in messages
+    ]
+    catalog = load_contacts()
+    key = email.lower()
+    for row in catalog.contacts:
+        if row.email.lower() == key:
+            row.sample_emails = previews
+            if previews and not row.sample_subjects:
+                row.sample_subjects = [p.subject for p in previews[:5]]
+            save_contacts(catalog)
+            break
+    return previews
 
 
 def refresh_domain_previews(domain: str, limit: int = 5) -> list[SampleEmailRow]:
@@ -329,6 +371,12 @@ def filter_contacts(
             if q in r.email.lower()
             or (r.name and q in r.name.lower())
             or (r.company and q in r.company.lower())
+            or any(q in s.lower() for s in r.sample_subjects)
+            or any(
+                q in (e.subject or "").lower() or q in (e.body_preview or "").lower()
+                for e in r.sample_emails
+            )
+            or any(q in phrase.lower() for phrase in r.key_phrases)
         ]
     if category:
         rows = [r for r in rows if r.category == category]

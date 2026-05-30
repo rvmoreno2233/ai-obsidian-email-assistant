@@ -1,14 +1,22 @@
 """Tests for catalog store."""
 
+from pathlib import Path
+
+import pytest
+import yaml
+
 from app.catalog_store import (
     apply_contact_importance,
     bulk_apply_contact_importance,
     filter_contacts,
     filter_domains,
+    get_contact,
     get_contacts_for_domain,
     importance_patch,
     load_contacts,
     load_domains,
+    refresh_contact_previews,
+    update_contact,
     update_domain,
 )
 from app.inbox_catalog import CONTACT_IMPORTANCE_LABELS, DEFAULT_EXCLUDED_CATEGORIES
@@ -132,3 +140,77 @@ def test_bulk_apply_contact_importance():
 
 def test_contact_importance_labels():
     assert set(CONTACT_IMPORTANCE_LABELS) == {"high", "medium", "low"}
+
+
+@pytest.fixture
+def catalog_tmp(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    catalog_dir = tmp_path / "catalog"
+    catalog_dir.mkdir()
+    contacts = {
+        "scraped_at": "2026-05-30T00:00:00+00:00",
+        "contact_count": 1,
+        "contacts": [
+            {
+                "rank": 1,
+                "email": "jane.doe@acmehealth.com",
+                "name": "Jane Doe",
+                "domain": "acmehealth.com",
+                "message_count": 5,
+                "importance": "high",
+                "category": "client",
+                "sample_subjects": ["Claims schema"],
+                "key_phrases": ["340B audit"],
+            }
+        ],
+    }
+    (catalog_dir / "inbox_contacts.yaml").write_text(yaml.dump(contacts), encoding="utf-8")
+    (catalog_dir / "inbox_domains.yaml").write_text(
+        yaml.dump({"scraped_at": "", "domain_count": 0, "domains": []}),
+        encoding="utf-8",
+    )
+    monkeypatch.setattr("app.catalog_store.CATALOG_DIR", catalog_dir)
+    monkeypatch.setattr("app.catalog_store.CONTACTS_FILE", catalog_dir / "inbox_contacts.yaml")
+    monkeypatch.setattr("app.catalog_store.DOMAINS_FILE", catalog_dir / "inbox_domains.yaml")
+    monkeypatch.setattr("app.inbox_catalog.CATALOG_DIR", catalog_dir)
+    monkeypatch.setattr("app.inbox_catalog.CONTACTS_FILE", catalog_dir / "inbox_contacts.yaml")
+    monkeypatch.setattr("app.inbox_catalog.DOMAINS_FILE", catalog_dir / "inbox_domains.yaml")
+    return catalog_dir
+
+
+def test_get_contact_and_key_phrases(catalog_tmp):
+    row = get_contact("jane.doe@acmehealth.com")
+    assert row is not None
+    assert row.key_phrases == ["340B audit"]
+
+    updated = update_contact("jane.doe@acmehealth.com", {"key_phrases": ["claims file", "SFTP"]})
+    assert updated is not None
+    assert updated.key_phrases == ["claims file", "SFTP"]
+
+
+def test_refresh_contact_previews_mock(catalog_tmp, monkeypatch: pytest.MonkeyPatch):
+    from app.schemas import NormalizedEmail
+
+    class FakeBackend:
+        def list_messages_for_sender(self, sender_email: str, top: int = 5):
+            return [
+                NormalizedEmail(
+                    message_id="msg-1",
+                    subject="ETL timeline",
+                    sender_email=sender_email,
+                    received_at="2026-05-22T16:00:00Z",
+                    body_text="Can you confirm when ingestion will be ready?",
+                )
+            ]
+
+    monkeypatch.setattr(
+        "app.graph_client.get_email_backend",
+        lambda backend_name=None: FakeBackend(),
+    )
+
+    previews = refresh_contact_previews("jane.doe@acmehealth.com")
+    assert len(previews) == 1
+    assert previews[0].subject == "ETL timeline"
+
+    row = get_contact("jane.doe@acmehealth.com")
+    assert row is not None
+    assert len(row.sample_emails) == 1

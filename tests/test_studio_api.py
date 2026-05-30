@@ -64,15 +64,35 @@ def test_ollama_health_mocked(studio_client, monkeypatch: pytest.MonkeyPatch):
 def test_ollama_test_mocked(studio_client, monkeypatch: pytest.MonkeyPatch):
     client, _, _, _ = studio_client
     mock_client = MagicMock()
+    mock_client.model = "llama3.1"
     mock_client.chat_text.return_value = "ok"
-    monkeypatch.setattr(web_app, "OllamaClient", lambda: mock_client)
+    created: list[str | None] = []
 
-    response = client.post("/api/ollama/test", json={"prompt": "ping"})
+    def factory(*, model=None, host=None, client=None):
+        created.append(model)
+        return mock_client
+
+    monkeypatch.setattr(web_app, "OllamaClient", factory)
+
+    response = client.post(
+        "/api/ollama/test",
+        json={"prompt": "ping", "model": "llama3.1"},
+    )
     assert response.status_code == 200
     body = response.json()
     assert body["ok"] is True
     assert body["reply"] == "ok"
+    assert body["model"] == "llama3.1"
     assert "latency_ms" in body
+    assert created == ["llama3.1"]
+
+    response2 = client.post(
+        "/api/ollama/test",
+        json={"prompt": "ping", "model": "phi3:mini"},
+    )
+    assert response2.status_code == 200
+    assert response2.json()["model"] == "phi3:mini"
+    assert created == ["llama3.1", "phi3:mini"]
 
 
 def test_templates_crud(studio_client):
@@ -299,3 +319,31 @@ def test_poller_run_once_updates_state(tmp_path: Path, monkeypatch: pytest.Monke
     assert state.last_processed_message_id == "cursor-new"
     assert state.last_processed_count == 3
     assert state.last_run is not None
+
+
+def test_contact_refresh_previews_accepts_post(studio_client, monkeypatch: pytest.MonkeyPatch):
+    """POST refresh-previews must not return 405 (route ordering regression)."""
+    client, _, _, _ = studio_client
+
+    class FakeRow:
+        email = "jane@acme.com"
+        sample_emails = []
+
+    monkeypatch.setattr(
+        web_app,
+        "get_contact",
+        lambda email: FakeRow() if email == "jane@acme.com" else None,
+    )
+    monkeypatch.setattr(web_app, "_require_graph_for_live", lambda: None)
+    monkeypatch.setattr(web_app, "refresh_contact_previews", lambda email: [])
+
+    response = client.post("/api/contacts/jane%40acme.com/refresh-previews")
+    assert response.status_code == 200
+    assert "job_id" in response.json()
+
+
+def test_graph_readiness_reports_mock_backend(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(web_app, "EMAIL_BACKEND", "mock")
+    readiness = web_app.graph_readiness()
+    assert readiness["ok"] is False
+    assert any(i["code"] == "mock_backend" for i in readiness["issues"])

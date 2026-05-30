@@ -319,6 +319,95 @@ td input[type="text"] { width: 100%; min-width: 100px; padding: 0.35rem; }
   overflow-y: auto;
 }
 
+.selectable-text {
+  user-select: text;
+  cursor: text;
+}
+
+tr.active-row td {
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.key-phrase-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.key-phrase-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.75rem;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+.key-phrase-chip .chip-remove {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.key-phrase-chip .chip-remove:hover {
+  color: var(--text);
+}
+
+#contact-key-phrases-input {
+  font-size: 0.82rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+  resize: vertical;
+}
+
+.setup-hint {
+  background: rgba(234, 179, 8, 0.08);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+}
+
+.setup-hint strong {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.setup-hint ol {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.setup-hint li {
+  margin-bottom: 0.5rem;
+}
+
+.setup-hint .setup-fix {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: pre-wrap;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .suggest-list {
   list-style: none;
   margin: 0.5rem 0;
@@ -345,7 +434,6 @@ td input[type="text"] { width: 100%; min-width: 100px; padding: 0.35rem; }
   .layout-with-panel.panel-open { grid-template-columns: 1fr; }
   .preview-panel { max-height: none; position: static; }
 }
-
 .toast {
   position: fixed;
   bottom: 1.5rem;
@@ -437,6 +525,58 @@ textarea { width: 100%; min-height: 120px; font-family: monospace; font-size: 0.
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
+}
+
+.es-subheading {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 1rem 0 0.35rem;
+}
+
+.model-test-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.model-test-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.85rem;
+}
+
+.model-test-name {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.model-test-result {
+  flex: 2;
+  min-width: 160px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.model-test-result.ok { color: var(--success); }
+.model-test-result.error { color: var(--danger); }
+
+.model-test-row button {
+  font-size: 0.78rem;
+  padding: 0.35rem 0.65rem;
+}
+
+#ollama-test-model {
+  min-width: 220px;
+  max-width: 320px;
 }
 
 .es-pre {
@@ -572,3 +712,54 @@ textarea { width: 100%; min-height: 120px; font-family: monospace; font-size: 0.
 }
 
 .thread-note-link:hover { text-decoration: underline; }
+
+.kb-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.kb-hit {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+}
+
+.kb-hit:hover {
+  border-color: var(--accent);
+}
+
+.kb-hit-subject {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.kb-hit-meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+.kb-hit-snippet {
+  font-size: 0.85rem;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.kb-detail {
+  margin-top: 1rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  position: relative;
+}
+
+.kb-detail .close-btn {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+}

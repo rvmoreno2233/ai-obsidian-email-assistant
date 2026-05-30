@@ -330,6 +330,8 @@ def save_catalog(domains: list[DomainStats], contacts: list[ContactStats]) -> No
                 "first_seen": c.first_seen,
                 "last_seen": c.last_seen,
                 "sample_subjects": c.sample_subjects,
+                "sample_emails": prev.get("sample_emails", []),
+                "key_phrases": prev.get("key_phrases", []),
             }
         )
 

@@ -18,6 +18,7 @@
     <button class="active" data-panel="dashboard">Dashboard</button>
     <button data-panel="domains">Domains</button>
     <button data-panel="contacts">Contacts</button>
+    <button data-panel="knowledge">Knowledge</button>
     <button data-panel="actions">Actions</button>
     <button data-panel="email-settings">Email Settings</button>
     <button data-panel="settings">Team Settings</button>
@@ -94,57 +95,143 @@
           <div id="domain-contacts-list"></div>
           <h4 style="font-size:0.85rem;color:var(--muted);margin:0.75rem 0 0.5rem;">Sample emails</h4>
           <div id="preview-emails"></div>
-          <div class="email-detail" id="email-detail" style="display:none;"></div>
+          <div class="email-detail selectable-text" id="email-detail" style="display:none;"></div>
         </aside>
       </div>
     </section>
 
     <!-- Contacts -->
     <section id="panel-contacts" class="panel">
-      <div class="toolbar">
-        <input type="search" id="contact-search" placeholder="Search contacts…" />
-        <select id="contact-domain-filter" title="Filter by domain">
-          <option value="">All domains</option>
-        </select>
-        <select id="contact-category-filter">
-          <option value="">All categories</option>
-        </select>
-        <label class="filter-toggle">
-          <input type="checkbox" id="contact-hide-excluded" checked />
-          Hide Ignore &amp; Newsletter
-        </label>
-        <select id="contact-importance-filter">
-          <option value="">All importance</option>
-          <option value="high">High — always on</option>
-          <option value="medium">Medium — keyword filtered</option>
-          <option value="low">Low — ignore</option>
-        </select>
-        <select id="contact-bulk-importance"></select>
-        <button class="secondary" id="contact-bulk-apply">Apply to selected</button>
-        <span id="contact-count" style="color: var(--muted); margin-left: auto;"></span>
+      <div class="layout-with-panel" id="contacts-layout">
+        <div>
+          <div class="toolbar">
+            <input type="search" id="contact-search" placeholder="Search contacts…" />
+            <select id="contact-domain-filter" title="Filter by domain">
+              <option value="">All domains</option>
+            </select>
+            <select id="contact-category-filter">
+              <option value="">All categories</option>
+            </select>
+            <label class="filter-toggle">
+              <input type="checkbox" id="contact-hide-excluded" checked />
+              Hide Ignore &amp; Newsletter
+            </label>
+            <select id="contact-importance-filter">
+              <option value="">All importance</option>
+              <option value="high">High — always on</option>
+              <option value="medium">Medium — keyword filtered</option>
+              <option value="low">Low — ignore</option>
+            </select>
+            <select id="contact-bulk-importance"></select>
+            <button class="secondary" id="contact-bulk-apply">Apply to selected</button>
+            <span id="contact-count" style="color: var(--muted); margin-left: auto;"></span>
+          </div>
+          <p class="filter-hint">
+            Open <strong>Preview</strong> on a contact to read sample emails, select key phrases,
+            and save context keywords for matching. High = always on · Medium = keyword filtered ·
+            Low = ignore.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="checkbox-col"><input type="checkbox" id="contact-select-all" /></th>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th id="contact-domain-col">Domain</th>
+                  <th>Msgs</th>
+                  <th>Importance</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="contacts-tbody"></tbody>
+            </table>
+          </div>
+          <div class="pagination" id="contacts-pagination"></div>
+        </div>
+        <aside class="preview-panel" id="contact-preview-panel">
+          <button class="close-btn secondary" id="contact-preview-close">Close</button>
+          <h3 id="contact-preview-title">Contact</h3>
+          <div id="contact-preview-meta"></div>
+          <div id="contact-preview-setup" class="setup-hint" style="display:none;"></div>
+          <div class="toolbar" style="margin-top:0.75rem;">
+            <button class="secondary" id="btn-contact-refresh-previews">Refresh emails</button>
+          </div>
+          <p class="filter-hint" id="contact-refresh-help" style="margin-top:0.35rem;">
+            Pulls recent mail from Outlook for this sender. Requires
+            <code>EMAIL_BACKEND=graph</code>, <code>MSGRAPH_CLIENT_ID</code> in
+            <code>.env</code>, and <code>email-assistant authenticate</code>.
+          </p>
+          <h4 style="font-size:0.85rem;color:var(--muted);margin:0.75rem 0 0.25rem;">Key phrases</h4>
+          <p class="filter-hint" style="margin-bottom:0.5rem;">
+            Select text in an email below, then click <strong>Add selection</strong>. Saved phrases
+            help determine context for this contact.
+          </p>
+          <div id="contact-key-phrase-chips" class="key-phrase-chips"></div>
+          <textarea id="contact-key-phrases-input" rows="3" placeholder="One phrase per line…" style="width:100%;margin-bottom:0.5rem;"></textarea>
+          <div class="toolbar" style="margin-bottom:0.75rem;">
+            <button class="secondary" id="btn-add-key-phrase">Add selection</button>
+            <button class="secondary" id="btn-copy-key-phrases">Copy all</button>
+            <button id="btn-save-key-phrases">Save phrases</button>
+          </div>
+          <h4 style="font-size:0.85rem;color:var(--muted);margin:0.75rem 0 0.5rem;">Sample emails</h4>
+          <div id="contact-preview-emails"></div>
+          <div class="email-detail selectable-text" id="contact-email-detail" style="display:none;"></div>
+        </aside>
       </div>
-      <p class="filter-hint">
-        Pick an included domain, then set importance per contact or bulk-apply to selected rows.
-        <strong>High</strong> = always on · <strong>Medium</strong> = keyword filtered ·
-        <strong>Low</strong> = ignore this contact (domain stays included).
+    </section>
+
+    <!-- Knowledge -->
+    <section id="panel-knowledge" class="panel">
+      <p class="filter-hint" style="margin-top:0;">
+        Copy emails from approved domains and contacts into a local searchable index.
+        Recontextualize with Ollama to add summaries and topics. Data stays in
+        <code>data/knowledge/</code> (gitignored).
       </p>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th class="checkbox-col"><input type="checkbox" id="contact-select-all" /></th>
-              <th>#</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th id="contact-domain-col">Domain</th>
-              <th>Msgs</th>
-              <th>Importance</th>
-            </tr>
-          </thead>
-          <tbody id="contacts-tbody"></tbody>
-        </table>
+      <div class="cards" id="knowledge-stats"></div>
+      <div class="cards">
+        <div class="card">
+          <div class="label">Sync inbox → knowledge</div>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0.5rem 0;">
+            Scans inbox metadata; copies new mail from approved senders only.
+          </p>
+          <input type="number" id="knowledge-sync-pages" value="50" min="1" max="500" style="width:80px;margin-bottom:0.5rem;" />
+          <span style="color:var(--muted);font-size:0.8rem;"> pages (~100 msg each)</span>
+          <br />
+          <label class="filter-toggle" style="margin:0.5rem 0;">
+            <input type="checkbox" id="knowledge-recontext-new" checked />
+            Recontextualize new emails
+          </label>
+          <br />
+          <button id="btn-knowledge-sync" style="margin-top:0.25rem;">Sync knowledge</button>
+        </div>
+        <div class="card">
+          <div class="label">Recontextualize</div>
+          <p style="font-size:0.85rem;color:var(--muted);margin:0.5rem 0;">
+            Refresh LLM summaries for emails missing context (or all if forced).
+          </p>
+          <label class="filter-toggle" style="margin:0.5rem 0;">
+            <input type="checkbox" id="knowledge-recontext-force" />
+            Force re-run on all indexed mail
+          </label>
+          <br />
+          <button id="btn-knowledge-recontext" class="secondary" style="margin-top:0.5rem;">Recontextualize</button>
+        </div>
       </div>
-      <div class="pagination" id="contacts-pagination"></div>
+      <div class="job-log" id="knowledge-job-log"></div>
+
+      <div class="es-section" style="margin-top:1.5rem;">
+        <h2 class="es-heading">Search email knowledge</h2>
+        <div class="toolbar">
+          <input type="search" id="knowledge-search" placeholder="Search subjects, bodies, summaries, topics…" style="flex:2;" />
+          <input type="text" id="knowledge-domain-filter" placeholder="Domain filter" style="flex:1;" />
+          <button id="btn-knowledge-search">Search</button>
+        </div>
+        <p id="knowledge-search-meta" class="es-meta"></p>
+        <div id="knowledge-results" class="kb-results"></div>
+        <div id="knowledge-detail" class="kb-detail" style="display:none;"></div>
+      </div>
     </section>
 
     <!-- Actions -->
@@ -187,14 +274,24 @@
         <h2 class="es-heading">Ollama</h2>
         <div class="es-ollama-status">
           <span id="ollama-badge" class="badge">Checking…</span>
-          <span id="ollama-model" class="es-meta"></span>
           <span id="ollama-host" class="es-meta"></span>
         </div>
-        <div class="toolbar" style="margin-top:0.75rem;">
+        <div class="form-group" style="margin-top:0.75rem;margin-bottom:0.5rem;">
+          <label>Configured model (<code>OLLAMA_MODEL</code> in .env)</label>
+          <div id="ollama-configured-model" class="es-meta"></div>
+        </div>
+        <div class="toolbar">
           <input type="text" id="ollama-test-prompt" placeholder="Test prompt" value="Reply with exactly: ok" style="flex:1;" />
+          <select id="ollama-test-model" title="Model to test"></select>
           <button id="btn-ollama-test" class="secondary">Run test prompt</button>
         </div>
         <pre id="ollama-test-result" class="es-pre" style="display:none;"></pre>
+        <h3 class="es-subheading">Installed models</h3>
+        <p class="filter-hint" style="margin-bottom:0.5rem;">
+          Test each model pulled locally (<code>ollama list</code>). Use a name from here for
+          <code>OLLAMA_MODEL</code> in <code>.env</code>, then restart Studio.
+        </p>
+        <div id="ollama-models-list" class="model-test-list"></div>
       </div>
 
       <!-- 2. Templates -->

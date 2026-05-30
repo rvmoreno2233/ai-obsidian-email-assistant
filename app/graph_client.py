@@ -80,6 +80,16 @@ class MockGraphBackend:
     def add_category(self, message_id: str, category: str) -> None:
         pass
 
+    def list_messages_for_sender(self, sender_email: str, top: int = 5) -> list[NormalizedEmail]:
+        needle = sender_email.lower().strip()
+        results: list[NormalizedEmail] = []
+        for email in self.list_recent_messages(top=1000):
+            if email.sender_email.lower() == needle:
+                results.append(email)
+            if len(results) >= top:
+                break
+        return results
+
 
 def _build_msal_app() -> msal.PublicClientApplication:
     MSAL_CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -278,6 +288,10 @@ class MsGraphBackend:
         """Fetch recent inbox messages from a sender domain."""
         return self._run(self._alist_messages_for_domain(domain, top))
 
+    def list_messages_for_sender(self, sender_email: str, top: int = 5) -> list[NormalizedEmail]:
+        """Fetch recent inbox messages from a specific sender."""
+        return self._run(self._alist_messages_for_sender(sender_email, top))
+
     async def _alist_messages_for_domain(self, domain: str, top: int) -> list[NormalizedEmail]:
         from msgraph.generated.users.item.mail_folders.item.messages.messages_request_builder import (  # noqa: E501
             MessagesRequestBuilder,
@@ -320,6 +334,59 @@ class MsGraphBackend:
                         subject=msg.subject or "",
                         sender_name=sender_name,
                         sender_email=sender_email,
+                        received_at=str(msg.received_date_time or ""),
+                        body_text=body_text,
+                        web_link=msg.web_link,
+                    )
+                )
+                if len(results) >= top:
+                    break
+        return results
+
+    async def _alist_messages_for_sender(
+        self, sender_email: str, top: int
+    ) -> list[NormalizedEmail]:
+        from msgraph.generated.users.item.mail_folders.item.messages.messages_request_builder import (  # noqa: E501
+            MessagesRequestBuilder,
+        )
+
+        client = self._get_client()
+        needle = sender_email.lower().strip()
+        query = MessagesRequestBuilder.MessagesRequestBuilderGetQueryParameters(
+            select=["id", "subject", "from", "body", "bodyPreview", "receivedDateTime", "webLink"],
+            top=min(top * 4, 50),
+            orderby=["receivedDateTime DESC"],
+            filter=f"contains(from/emailAddress/address,'{needle}')",
+        )
+        config = MessagesRequestBuilder.MessagesRequestBuilderGetRequestConfiguration(
+            query_parameters=query,
+        )
+        page = await client.me.mail_folders.by_mail_folder_id("inbox").messages.get(
+            request_configuration=config,
+        )
+        results: list[NormalizedEmail] = []
+        if page and page.value:
+            for msg in page.value:
+                sender = msg.from_
+                sender_email_addr = ""
+                sender_name = None
+                if sender and sender.email_address:
+                    sender_email_addr = sender.email_address.address or ""
+                    sender_name = sender.email_address.name
+                if sender_email_addr.lower() != needle:
+                    continue
+                preview = getattr(msg, "body_preview", None) or ""
+                body_text = preview
+                if msg.body and msg.body.content and not preview:
+                    body_text = normalize_body(msg.body.content)[:500]
+                elif msg.body and msg.body.content:
+                    body_text = preview or normalize_body(msg.body.content)[:500]
+                results.append(
+                    NormalizedEmail(
+                        message_id=msg.id or "",
+                        subject=msg.subject or "",
+                        sender_name=sender_name,
+                        sender_email=sender_email_addr,
                         received_at=str(msg.received_date_time or ""),
                         body_text=body_text,
                         web_link=msg.web_link,

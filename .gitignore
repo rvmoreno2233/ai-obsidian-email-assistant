@@ -16,6 +16,7 @@ dist/
 config.json
 data/catalog/*.yaml
 data/queue/
+data/knowledge/
 
 # Obsidian — personal UI state (do not sync)
 vault/.obsidian/workspace.json

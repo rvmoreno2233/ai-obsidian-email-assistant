@@ -19,14 +19,23 @@ from app.catalog_store import (
     bulk_update_domains,
     filter_contacts,
     filter_domains,
+    get_contact,
     get_contacts_for_domain,
     get_domain,
     load_contacts,
     load_domains,
+    refresh_contact_previews,
     update_contact,
     update_domain,
 )
-from app.config import DATA_DIR, MSAL_CACHE_PATH, MSGRAPH_CLIENT_ID, PROJECT_ROOT, PROMPTS_DIR
+from app.config import (
+    DATA_DIR,
+    EMAIL_BACKEND,
+    MSAL_CACHE_PATH,
+    MSGRAPH_CLIENT_ID,
+    PROJECT_ROOT,
+    PROMPTS_DIR,
+)
 from app.email_rules import (
     EmailRule,
     ResponseTemplate,
@@ -79,6 +88,7 @@ class ContactPatch(BaseModel):
     company: str | None = None
     importance: str | None = None
     agent_enabled: bool | None = None
+    key_phrases: list[str] | None = None
 
 
 class BulkContactPatch(BaseModel):
@@ -97,15 +107,74 @@ class ScrapeRequest(BaseModel):
     page_size: int = 100
 
 
+def _contact_email_param(email: str) -> str:
+    from urllib.parse import unquote
+
+    return unquote(email).strip()
+
+
+def graph_readiness() -> dict[str, Any]:
+    """Check whether live Outlook email fetch is available."""
+    issues: list[dict[str, str]] = []
+    if EMAIL_BACKEND == "mock":
+        issues.append(
+            {
+                "code": "mock_backend",
+                "message": "EMAIL_BACKEND is mock — live refresh uses test fixtures only.",
+                "fix": "Set EMAIL_BACKEND=graph in .env, then restart Studio (email-assistant ui).",
+            }
+        )
+    if not MSGRAPH_CLIENT_ID:
+        issues.append(
+            {
+                "code": "graph_not_configured",
+                "message": "Microsoft Graph is not configured.",
+                "fix": "Add MSGRAPH_CLIENT_ID to .env (see .env.example), then restart Studio.",
+            }
+        )
+    if MSGRAPH_CLIENT_ID and not MSAL_CACHE_PATH.exists():
+        issues.append(
+            {
+                "code": "not_authenticated",
+                "message": "Outlook is not authenticated on this machine.",
+                "fix": "Run in terminal: email-assistant authenticate",
+            }
+        )
+    return {
+        "ok": not issues,
+        "backend": EMAIL_BACKEND,
+        "graph_configured": bool(MSGRAPH_CLIENT_ID),
+        "authenticated": MSAL_CACHE_PATH.exists(),
+        "issues": issues,
+    }
+
+
+def _require_graph_for_live() -> None:
+    readiness = graph_readiness()
+    if readiness["ok"]:
+        return
+    raise HTTPException(
+        status_code=503,
+        detail={
+            "message": "Live email refresh is not available.",
+            "issues": readiness["issues"],
+        },
+    )
+
+
 @app.get("/api/status")
 def api_status() -> dict[str, Any]:
     domains = load_domains()
     contacts = load_contacts()
     team = load_team_config()
+    readiness = graph_readiness()
     return {
         "team_name": team.team_name,
-        "graph_configured": bool(MSGRAPH_CLIENT_ID),
-        "authenticated": MSAL_CACHE_PATH.exists(),
+        "graph_configured": readiness["graph_configured"],
+        "authenticated": readiness["authenticated"],
+        "email_backend": readiness["backend"],
+        "email_refresh_ready": readiness["ok"],
+        "email_refresh_issues": readiness["issues"],
         "domain_count": len(domains.domains),
         "contact_count": len(contacts.contacts),
         "config_client_count": sum(1 for d in domains.domains if d.config_client_abbrev),
@@ -359,26 +428,107 @@ def api_list_contacts(
     }
 
 
-@app.patch("/api/contacts/{email:path}")
+@app.get("/api/contacts/{email}/previews")
+def api_contact_previews(email: str, live: bool = False) -> dict[str, Any]:
+    contact_email = _contact_email_param(email)
+    row = get_contact(contact_email)
+    if not row:
+        raise HTTPException(404, f"Contact not found: {contact_email}")
+
+    graph_warning: dict[str, Any] | None = None
+    if live or not row.sample_emails:
+        try:
+            _require_graph_for_live()
+            previews = refresh_contact_previews(contact_email)
+        except HTTPException as exc:
+            if row.sample_emails:
+                previews = row.sample_emails
+                graph_warning = (
+                    exc.detail if isinstance(exc.detail, dict) else {"message": str(exc.detail)}
+                )
+            else:
+                raise
+        except Exception as e:
+            if row.sample_emails:
+                previews = row.sample_emails
+                graph_warning = {"message": str(e)}
+            else:
+                raise HTTPException(502, str(e)) from e
+    else:
+        previews = row.sample_emails
+
+    items = [p.model_dump() for p in previews] if previews else []
+    if not items and row.sample_subjects:
+        items = [
+            {
+                "subject": s,
+                "body_preview": "",
+                "sender_email": row.email,
+                "message_id": "",
+            }
+            for s in row.sample_subjects
+        ]
+
+    payload: dict[str, Any] = {
+        "email": contact_email,
+        "previews": items,
+        "contact_row": row.model_dump(),
+    }
+    if graph_warning:
+        payload["graph_warning"] = graph_warning
+    return payload
+
+
+@app.post("/api/contacts/{email}/refresh-previews")
+def api_refresh_contact_previews(email: str) -> dict[str, str]:
+    contact_email = _contact_email_param(email)
+    if not get_contact(contact_email):
+        raise HTTPException(404, f"Contact not found: {contact_email}")
+    _require_graph_for_live()
+
+    def _task() -> dict[str, Any]:
+        previews = refresh_contact_previews(contact_email)
+        return {"message": f"Refreshed {len(previews)} previews", "count": len(previews)}
+
+    job = create_job(f"refresh-contact-{contact_email[:20]}", _task)
+    return {"job_id": job.id}
+
+
+@app.patch("/api/contacts/{email}/importance")
+def api_patch_contact_importance(email: str, patch: ContactPatch) -> dict[str, Any]:
+    contact_email = _contact_email_param(email)
+    if not patch.importance or patch.importance not in CONTACT_IMPORTANCE_LABELS:
+        raise HTTPException(400, "importance required (high, medium, low)")
+    contact_row = get_contact(contact_email)
+    if not contact_row:
+        raise HTTPException(404, f"Contact not found: {contact_email}")
+    domain_row = get_domain(contact_row.domain)
+    domain_category = domain_row.category if domain_row else contact_row.category
+    row = apply_contact_importance(contact_email, patch.importance, domain_category)
+    if not row:
+        raise HTTPException(404, f"Contact not found: {contact_email}")
+    return row.model_dump()
+
+
+@app.patch("/api/contacts/{email}")
 def api_patch_contact(email: str, patch: ContactPatch) -> dict[str, Any]:
+    contact_email = _contact_email_param(email)
     data = patch.model_dump(exclude_none=True)
     if "importance" in data and data["importance"] in CONTACT_IMPORTANCE_LABELS:
-        contact_row = next(
-            (c for c in load_contacts().contacts if c.email.lower() == email.lower()), None
-        )
+        contact_row = get_contact(contact_email)
         if not contact_row:
-            raise HTTPException(404, f"Contact not found: {email}")
+            raise HTTPException(404, f"Contact not found: {contact_email}")
         domain_row = get_domain(contact_row.domain)
         domain_category = domain_row.category if domain_row else contact_row.category
-        row = apply_contact_importance(email, data.pop("importance"), domain_category)
+        row = apply_contact_importance(contact_email, data.pop("importance"), domain_category)
         if not row:
-            raise HTTPException(404, f"Contact not found: {email}")
+            raise HTTPException(404, f"Contact not found: {contact_email}")
         if data:
-            row = update_contact(email, data)
+            row = update_contact(contact_email, data)
         return row.model_dump() if row else {}
-    row = update_contact(email, data)
+    row = update_contact(contact_email, data)
     if not row:
-        raise HTTPException(404, f"Contact not found: {email}")
+        raise HTTPException(404, f"Contact not found: {contact_email}")
     return row.model_dump()
 
 
@@ -388,23 +538,6 @@ def api_bulk_contacts(patch: BulkContactPatch) -> dict[str, Any]:
         raise HTTPException(400, "importance required (high, medium, low)")
     count = bulk_apply_contact_importance(patch.emails, patch.importance)
     return {"updated": count}
-
-
-@app.patch("/api/contacts/{email:path}/importance")
-def api_patch_contact_importance(email: str, patch: ContactPatch) -> dict[str, Any]:
-    if not patch.importance or patch.importance not in CONTACT_IMPORTANCE_LABELS:
-        raise HTTPException(400, "importance required (high, medium, low)")
-    contact_row = next(
-        (c for c in load_contacts().contacts if c.email.lower() == email.lower()), None
-    )
-    if not contact_row:
-        raise HTTPException(404, f"Contact not found: {email}")
-    domain_row = get_domain(contact_row.domain)
-    domain_category = domain_row.category if domain_row else contact_row.category
-    row = apply_contact_importance(email, patch.importance, domain_category)
-    if not row:
-        raise HTTPException(404, f"Contact not found: {email}")
-    return row.model_dump()
 
 
 @app.post("/api/actions/scrape")
@@ -494,18 +627,19 @@ def api_ollama_health() -> dict[str, Any]:
 
 class OllamaTestRequest(BaseModel):
     prompt: str = "Reply with exactly: ok"
+    model: str = Field(..., min_length=1)
 
 
 @app.post("/api/ollama/test")
 def api_ollama_test(body: OllamaTestRequest) -> dict[str, Any]:
-    client = OllamaClient()
+    client = OllamaClient(model=body.model)
     started = time.perf_counter()
     try:
         reply = client.chat_text(messages=[{"role": "user", "content": body.prompt}])
     except LLMConnectionError as exc:
         raise HTTPException(503, str(exc)) from exc
     elapsed_ms = round((time.perf_counter() - started) * 1000, 1)
-    return {"ok": True, "latency_ms": elapsed_ms, "reply": reply[:500]}
+    return {"ok": True, "model": body.model, "latency_ms": elapsed_ms, "reply": reply[:500]}
 
 
 # --- Email Settings: Templates ---
@@ -727,6 +861,103 @@ def api_queue_reject(entry_id: str) -> dict[str, Any]:
 def api_queue_auto() -> dict[str, Any]:
     items = _queue_store.list_entries("auto")
     return {"items": [item.model_dump() for item in items]}
+
+
+# --- Knowledge base ---
+
+
+class KnowledgeSyncRequest(BaseModel):
+    max_pages: int = Field(default=50, ge=1, le=500)
+    page_size: int = Field(default=100, ge=1, le=100)
+    recontextualize_new: bool = True
+
+
+class KnowledgeRecontextRequest(BaseModel):
+    message_ids: list[str] = Field(default_factory=list)
+    force: bool = False
+
+
+@app.get("/api/knowledge/stats")
+def api_knowledge_stats() -> dict[str, Any]:
+    from app.email_knowledge import knowledge_stats
+
+    return knowledge_stats()
+
+
+@app.get("/api/knowledge/search")
+def api_knowledge_search(
+    q: str = "",
+    domain: str = "",
+    sender: str = "",
+    limit: int = Query(25, ge=1, le=100),
+) -> dict[str, Any]:
+    from app.email_knowledge import search_knowledge
+
+    hits = search_knowledge(q, limit=limit, domain=domain, sender=sender)
+    return {
+        "query": q,
+        "total": len(hits),
+        "items": [
+            {
+                "score": h.score,
+                "snippet": h.snippet,
+                **h.entry.model_dump(),
+            }
+            for h in hits
+        ],
+    }
+
+
+@app.get("/api/knowledge/{message_id}")
+def api_knowledge_entry(message_id: str) -> dict[str, Any]:
+    from app.email_knowledge import get_entry
+
+    entry = get_entry(message_id)
+    if not entry:
+        raise HTTPException(404, f"Knowledge entry not found: {message_id}")
+    return entry.model_dump()
+
+
+@app.post("/api/knowledge/sync")
+def api_knowledge_sync(req: KnowledgeSyncRequest) -> dict[str, str]:
+    def _task() -> dict[str, Any]:
+        from app.email_knowledge import sync_knowledge
+        from app.graph_client import get_email_backend
+
+        backend = get_email_backend()
+        if not hasattr(backend, "list_messages_metadata"):
+            raise RuntimeError("Knowledge sync requires EMAIL_BACKEND=graph")
+        result = sync_knowledge(
+            backend=backend,
+            max_pages=req.max_pages,
+            page_size=req.page_size,
+            recontextualize_new=req.recontextualize_new,
+        )
+        return {
+            "message": (
+                f"Indexed {result.added} new email(s) "
+                f"({result.skipped_unapproved} unapproved, {result.skipped_existing} existing)"
+            ),
+            **result.model_dump(),
+        }
+
+    job = create_job("sync-knowledge", _task)
+    return {"job_id": job.id}
+
+
+@app.post("/api/knowledge/recontextualize")
+def api_knowledge_recontextualize(req: KnowledgeRecontextRequest) -> dict[str, str]:
+    def _task() -> dict[str, Any]:
+        from app.email_knowledge import recontextualize_entries
+
+        result = recontextualize_entries(message_ids=req.message_ids or None, force=req.force)
+        return {
+            "message": f"Recontextualized {result['updated']} email(s)",
+            **result,
+        }
+
+    job = create_job("recontextualize-knowledge", _task)
+    return {"job_id": job.id}
 
 
 @app.get("/")
