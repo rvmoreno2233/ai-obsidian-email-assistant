@@ -24,25 +24,20 @@ from app.text_utils import normalize_body
 class EmailBackend(Protocol):
     """Interface for email read/write operations."""
 
-    def list_recent_messages(self, top: int = 25) -> list[NormalizedEmail]:
-        ...
+    def list_recent_messages(self, top: int = 25) -> list[NormalizedEmail]: ...
 
-    def get_message_body(self, message_id: str) -> str:
-        ...
+    def get_message_body(self, message_id: str) -> str: ...
 
     def create_reply_draft(
         self,
         message_id: str,
         subject: str,
         body: str,
-    ) -> str | None:
-        ...
+    ) -> str | None: ...
 
-    def mark_as_read(self, message_id: str) -> None:
-        ...
+    def mark_as_read(self, message_id: str) -> None: ...
 
-    def add_category(self, message_id: str, category: str) -> None:
-        ...
+    def add_category(self, message_id: str, category: str) -> None: ...
 
 
 class MockGraphBackend:
@@ -153,7 +148,6 @@ class MsGraphBackend:
     def _get_client(self):
         if self._client is not None:
             return self._client
-        import asyncio
 
         from azure.core.credentials import AccessToken, TokenCredential
         from msgraph import GraphServiceClient
@@ -179,7 +173,7 @@ class MsGraphBackend:
         return self._run(self._alist_recent_messages(top))
 
     async def _alist_recent_messages(self, top: int) -> list[NormalizedEmail]:
-        from msgraph.generated.users.item.mail_folders.item.messages.messages_request_builder import (
+        from msgraph.generated.users.item.mail_folders.item.messages.messages_request_builder import (  # noqa: E501
             MessagesRequestBuilder,
         )
 
@@ -230,10 +224,11 @@ class MsGraphBackend:
         return self._run(self._alist_messages_metadata(folder, page_size, max_pages))
 
     async def _alist_messages_metadata(self, folder: str, page_size: int, max_pages: int) -> list:
-        from app.inbox_catalog import MessageMeta
-        from msgraph.generated.users.item.mail_folders.item.messages.messages_request_builder import (
+        from msgraph.generated.users.item.mail_folders.item.messages.messages_request_builder import (  # noqa: E501
             MessagesRequestBuilder,
         )
+
+        from app.inbox_catalog import MessageMeta
 
         client = self._get_client()
         query = MessagesRequestBuilder.MessagesRequestBuilderGetQueryParameters(
@@ -284,7 +279,7 @@ class MsGraphBackend:
         return self._run(self._alist_messages_for_domain(domain, top))
 
     async def _alist_messages_for_domain(self, domain: str, top: int) -> list[NormalizedEmail]:
-        from msgraph.generated.users.item.mail_folders.item.messages.messages_request_builder import (
+        from msgraph.generated.users.item.mail_folders.item.messages.messages_request_builder import (  # noqa: E501
             MessagesRequestBuilder,
         )
 
@@ -386,7 +381,7 @@ class MsGraphBackend:
         from msgraph.generated.models.body_type import BodyType
         from msgraph.generated.models.item_body import ItemBody
         from msgraph.generated.models.message import Message
-        from msgraph.generated.users.item.messages.item.create_reply.create_reply_post_request_body import (
+        from msgraph.generated.users.item.messages.item.create_reply.create_reply_post_request_body import (  # noqa: E501
             CreateReplyPostRequestBody,
         )
 

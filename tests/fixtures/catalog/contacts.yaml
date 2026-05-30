@@ -1,0 +1,18 @@
+contacts:
+  - name: Jane Doe
+    email: jane.doe@acmehealth.com
+    company: Acme Health
+    importance: high
+    agent_enabled: true
+
+  - name: Mark Smith
+    email: mark.smith@acmehealth.com
+    company: Acme Health
+    importance: medium
+    agent_enabled: true
+
+  - name: Mark Lee
+    email: mark.lee@northstaranalytics.com
+    company: Northstar Analytics
+    importance: high
+    agent_enabled: true

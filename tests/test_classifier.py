@@ -41,6 +41,6 @@ def test_classify_fixtures(classifier, emails, message_id, expected_category):
     email = next(e for e in emails if e.message_id == message_id)
     entities = match_entities(email, classifier.catalogs)
     result = classifier.classify(email, entities)
-    assert result.category == expected_category, (
-        f"{message_id}: expected {expected_category}, got {result.category} ({result.reason})"
-    )
+    assert (
+        result.category == expected_category
+    ), f"{message_id}: expected {expected_category}, got {result.category} ({result.reason})"

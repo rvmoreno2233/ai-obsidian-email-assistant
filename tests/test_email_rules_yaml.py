@@ -6,9 +6,7 @@ import pytest
 import yaml
 
 from app.email_rules import (
-    EmailRule,
     EmailRulesCatalog,
-    ResponseTemplate,
     ResponseTemplatesCatalog,
     get_rule,
     get_template,

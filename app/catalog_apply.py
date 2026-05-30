@@ -9,7 +9,6 @@ import yaml
 
 from app.config import DATA_DIR, PROJECT_ROOT
 from app.inbox_catalog import (
-    CATEGORIES_FILE,
     CATEGORY_LABELS,
     CONTACT_IMPORTANCE_LABELS,
     CONTACTS_FILE,
@@ -28,8 +27,8 @@ def _load_yaml(path: Path) -> dict:
 
 
 def apply_catalog(
-  min_messages: int = 3,
-  agent_importance: tuple[str, ...] = ("high", "medium"),
+    min_messages: int = 3,
+    agent_importance: tuple[str, ...] = ("high", "medium"),
 ) -> dict[str, int]:
     """Generate companies.yaml entries, Obsidian notes, and agent policies."""
     domains_raw = _load_yaml(DOMAINS_FILE)
@@ -202,7 +201,9 @@ Source: `config.json` → `client_abbrev: {abbrev}`
 
     if mapping:
         (DATA_DIR / "client_domain_map.yaml").write_text(
-            yaml.dump({"clients": list(mapping.values())}, default_flow_style=False, sort_keys=False),
+            yaml.dump(
+                {"clients": list(mapping.values())}, default_flow_style=False, sort_keys=False
+            ),
             encoding="utf-8",
         )
 
@@ -351,7 +352,10 @@ def _write_domain_catalog_note(domains_raw: dict) -> None:
         f"Scraped: {domains_raw.get('scraped_at', 'unknown')}",
         f"Domains: {domains_raw.get('domain_count', 0)}",
         "",
-        "Edit categories in `data/catalog/inbox_domains.yaml`, then run `email-assistant apply-catalog`.",
+        (
+            "Edit categories in `data/catalog/inbox_domains.yaml`, "
+            "then run `email-assistant apply-catalog`."
+        ),
         "",
         "| Domain | Msgs | Category | Company |",
         "|--------|------|----------|---------|",

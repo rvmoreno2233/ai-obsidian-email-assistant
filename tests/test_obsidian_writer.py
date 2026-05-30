@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 from app.classifier import RuleBasedClassifier
-from app.config import DATA_DIR, FIXTURES_DIR
+from app.config import FIXTURES_DIR
 from app.entity_matcher import load_catalogs, match_entities
 from app.obsidian_writer import ObsidianWriter, normalize_subject_root, thread_slug
 from app.responder import RuleBasedResponder
@@ -44,7 +44,7 @@ def test_mark_waiting_item_complete(tmp_vault: Path, data_dir: Path, monkeypatch
     assert "acme_schema_approval" in waiting_note.read_text()
 
     yaml_data = (data_dir / "waiting_for.yaml").read_text()
-    assert "status: closed" in yaml_data or 'status: closed' in yaml_data
+    assert "status: closed" in yaml_data or "status: closed" in yaml_data
 
 
 def test_thread_slug_from_domain_and_subject_root():

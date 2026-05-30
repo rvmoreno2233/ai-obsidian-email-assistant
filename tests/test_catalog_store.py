@@ -46,7 +46,9 @@ def test_filter_domains_category_overrides_exclude():
     ignore_domains = [r for r in catalog.domains if r.category == "ignore"]
     if not ignore_domains:
         return
-    filtered = filter_domains(catalog, category="ignore", exclude_categories=DEFAULT_EXCLUDED_CATEGORIES)
+    filtered = filter_domains(
+        catalog, category="ignore", exclude_categories=DEFAULT_EXCLUDED_CATEGORIES
+    )
     assert len(filtered) >= 1
     assert all(r.category == "ignore" for r in filtered)
 

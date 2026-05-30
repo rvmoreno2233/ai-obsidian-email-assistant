@@ -129,13 +129,9 @@ def rule_matches(email: NormalizedEmail, rule: EmailRule) -> bool:
         if not subject_keywords and not body_keywords:
             return False
         subject_ok = (
-            _keywords_match(subject_keywords, subject, match_cfg.mode)
-            if subject_keywords
-            else True
+            _keywords_match(subject_keywords, subject, match_cfg.mode) if subject_keywords else True
         )
-        body_ok = (
-            _keywords_match(body_keywords, body, match_cfg.mode) if body_keywords else True
-        )
+        body_ok = _keywords_match(body_keywords, body, match_cfg.mode) if body_keywords else True
         if subject_keywords and body_keywords:
             return subject_ok and body_ok
         if subject_keywords:

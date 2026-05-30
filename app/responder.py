@@ -92,9 +92,7 @@ Summary: {classification.summary}
             return result.model_copy(update={"auto_send_allowed": False})
         except Exception:
             fallback = self.rule_fallback.draft(email, classification)
-            return fallback.model_copy(
-                update={"reason": f"LLM fallback: {fallback.reason}"}
-            )
+            return fallback.model_copy(update={"reason": f"LLM fallback: {fallback.reason}"})
 
 
 def get_responder(mode: str | None = None) -> RuleBasedResponder | LLMResponder:

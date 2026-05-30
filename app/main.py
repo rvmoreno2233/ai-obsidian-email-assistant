@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import subprocess
-import sys
 from pathlib import Path
 
 import typer
@@ -44,7 +43,8 @@ def scrape_inbox(
     page_size: int = typer.Option(100, "--page-size", help="Messages per page (max 100)"),
 ) -> None:
     """Scrape inbox history; build domain/contact catalog for categorization."""
-    from app.inbox_catalog import print_scrape_summary, save_catalog, scrape_inbox as do_scrape
+    from app.inbox_catalog import print_scrape_summary, save_catalog
+    from app.inbox_catalog import scrape_inbox as do_scrape
 
     typer.echo(f"Scraping inbox (up to {max_pages * page_size} messages)...")
     domains, contacts = do_scrape(max_pages=max_pages, page_size=page_size)
@@ -58,7 +58,9 @@ def categorize_domains_cmd() -> None:
     from app.catalog_categorize import categorize_domains
 
     n = categorize_domains()
-    typer.echo(f"Updated categories for {n} domains. Edit data/catalog/inbox_domains.yaml as needed.")
+    typer.echo(
+        f"Updated categories for {n} domains. Edit data/catalog/inbox_domains.yaml as needed."
+    )
 
 
 @app.command("apply-catalog")
@@ -73,7 +75,9 @@ def apply_catalog_cmd() -> None:
     typer.echo("Applied catalog:")
     for k, v in stats.items():
         typer.echo(f"  {k}: {v}")
-    typer.echo("\nEdit data/catalog/inbox_domains.yaml to set categories, then re-run apply-catalog.")
+    typer.echo(
+        "\nEdit data/catalog/inbox_domains.yaml to set categories, then re-run apply-catalog."
+    )
 
 
 @app.command()

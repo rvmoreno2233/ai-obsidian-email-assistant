@@ -12,8 +12,8 @@ from app.config import FIXTURES_DIR
 from app.entity_matcher import load_catalogs, match_entities
 from app.graph_client import MockGraphBackend
 from app.obsidian_writer import ObsidianWriter
-from app.response_queue import ResponseQueueStore
 from app.responder import RuleBasedResponder
+from app.response_queue import ResponseQueueStore
 from app.rule_engine import RuleEngine
 from app.schemas import NormalizedEmail
 from tests.test_email_rules_yaml import EXAMPLE_RULES, EXAMPLE_TEMPLATES
@@ -85,4 +85,3 @@ def test_route_rule_engine_short_circuits_legacy_draft(tmp_path: Path, data_dir:
     assert action.draft_created is True
     assert action.queue_entry_id is not None
     assert len(ResponseQueueStore(queue_dir).list_entries("approval")) == 1
-

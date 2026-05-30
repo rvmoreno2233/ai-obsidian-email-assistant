@@ -55,7 +55,6 @@ def email_processor(msg: func.QueueMessage) -> None:
     from app.graph_client import get_email_backend
     from app.obsidian_writer import ObsidianWriter
     from app.responder import draft_response, get_responder
-    from app.schemas import NormalizedEmail
 
     data = json.loads(msg.get_body().decode("utf-8"))
     message_id = data["message_id"]

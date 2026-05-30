@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import yaml
 
 from app.config import DATA_DIR
-from app.inbox_catalog import CATEGORIES_FILE, DOMAINS_FILE, suggest_category, suggest_company_name
+from app.inbox_catalog import DOMAINS_FILE, suggest_category, suggest_company_name
+
 
 def _domain_rules_from_team() -> list[tuple[str, str, str | None]]:
     """Build rules from config/team.yaml domain_hints."""

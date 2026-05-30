@@ -5,7 +5,6 @@ from __future__ import annotations
 import json
 import re
 from functools import lru_cache
-from pathlib import Path
 
 from pydantic import BaseModel, Field
 
@@ -69,7 +68,9 @@ def search_clients(query: str = "", limit: int = 50) -> list[ClientSummary]:
             )
         ).lower()
         if q in hay:
-            score = 100 if q == c.client_abbrev.lower() else 50 if q in c.client_name.lower() else 10
+            score = (
+                100 if q == c.client_abbrev.lower() else 50 if q in c.client_name.lower() else 10
+            )
             scored.append((score, c))
     scored.sort(key=lambda x: -x[0])
     return [c for _, c in scored[:limit]]

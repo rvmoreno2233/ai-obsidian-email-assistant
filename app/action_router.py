@@ -91,9 +91,7 @@ class ActionRouter:
                 logger.exception("Obsidian write failed")
 
         if classification.category == "waiting_info_arrived":
-            action.notifications.append(
-                f"Waiting info may have arrived: {email.subject}"
-            )
+            action.notifications.append(f"Waiting info may have arrived: {email.subject}")
             if self.writer:
                 for item_id in classification.keywords:
                     try:

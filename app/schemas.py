@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -25,11 +25,11 @@ class NormalizedEmail(BaseModel):
 
     message_id: str
     subject: str
-    sender_name: Optional[str] = None
+    sender_name: str | None = None
     sender_email: str
     received_at: str
     body_text: str
-    web_link: Optional[str] = None
+    web_link: str | None = None
 
 
 class EmailClassification(BaseModel):
@@ -38,9 +38,9 @@ class EmailClassification(BaseModel):
     category: EmailCategory
     priority: Priority
     confidence: float = Field(ge=0, le=1)
-    company: Optional[str] = None
-    contact: Optional[str] = None
-    project: Optional[str] = None
+    company: str | None = None
+    contact: str | None = None
+    project: str | None = None
     keywords: list[str] = Field(default_factory=list)
     summary: str
     reason: str
@@ -51,7 +51,7 @@ class WaitingItemMatch(BaseModel):
     """Match between an email and an open waiting-for item."""
 
     waiting_item_id: str
-    project: Optional[str] = None
+    project: str | None = None
     matched: bool
     evidence: str
     confidence: float = Field(ge=0, le=1)
@@ -62,8 +62,8 @@ class DraftResponse(BaseModel):
 
     should_reply: bool
     auto_send_allowed: bool = False
-    subject: Optional[str] = None
-    body: Optional[str] = None
+    subject: str | None = None
+    body: str | None = None
     reason: str
 
 
@@ -73,13 +73,13 @@ class RoutedAction(BaseModel):
     message_id: str
     notes_written: list[str] = Field(default_factory=list)
     draft_created: bool = False
-    draft_location: Optional[str] = None
+    draft_location: str | None = None
     notifications: list[str] = Field(default_factory=list)
     waiting_items_closed: list[str] = Field(default_factory=list)
     errors: list[str] = Field(default_factory=list)
     rule_matched: bool = False
-    rule_id: Optional[str] = None
-    queue_entry_id: Optional[str] = None
+    rule_id: str | None = None
+    queue_entry_id: str | None = None
 
 
 # --- YAML catalog models ---
@@ -89,31 +89,31 @@ class CompanyRecord(BaseModel):
     name: str
     domains: list[str] = Field(default_factory=list)
     keywords: list[str] = Field(default_factory=list)
-    default_project: Optional[str] = None
+    default_project: str | None = None
     contacts: list[str] = Field(default_factory=list)
 
 
 class ContactRecord(BaseModel):
     name: str
     email: str
-    company: Optional[str] = None
-    role: Optional[str] = None
+    company: str | None = None
+    role: str | None = None
     importance: Literal["low", "medium", "high"] = "medium"
     notes: list[str] = Field(default_factory=list)
 
 
 class ProjectRecord(BaseModel):
     name: str
-    company: Optional[str] = None
+    company: str | None = None
     keywords: list[str] = Field(default_factory=list)
     notification_level: Literal["low", "medium", "high"] = "medium"
 
 
 class WaitingItem(BaseModel):
     id: str
-    project: Optional[str] = None
-    company: Optional[str] = None
-    waiting_for: Optional[str] = None
+    project: str | None = None
+    company: str | None = None
+    waiting_for: str | None = None
     keywords: list[str] = Field(default_factory=list)
     notify_when_found: bool = True
     status: Literal["open", "closed"] = "open"
@@ -138,8 +138,8 @@ class WaitingForCatalog(BaseModel):
 class EntityMatchResult(BaseModel):
     """Aggregated entity matching for one email."""
 
-    company: Optional[str] = None
-    contact: Optional[str] = None
+    company: str | None = None
+    contact: str | None = None
     projects: list[str] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
     waiting_matches: list[WaitingItemMatch] = Field(default_factory=list)

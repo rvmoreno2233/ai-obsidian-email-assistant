@@ -3,6 +3,7 @@ description: Privacy, PII, and email data handling
 alwaysApply: false
 globs:
   - data/catalog/**
+  - data/queue/**
   - app/graph_client.py
   - app/llm_client.py
   - app/web/**
@@ -13,6 +14,7 @@ globs:
 ## Sensitive data locations
 
 - `data/catalog/inbox_*.yaml` — scraped subjects, senders, previews (PII)
+- `data/queue/` — approval/auto queues, processing log, poller cursor (may contain subjects, sender addresses, draft bodies)
 - `config.json` — client names, 340B IDs
 - Graph message content when `EMAIL_BACKEND=graph`
 - LLM prompts when `CLASSIFIER_MODE=llm` or `RESPONDER_MODE=llm` (local Ollama)
@@ -29,3 +31,4 @@ globs:
 - Review for unnecessary email content
 - Use `@privacy-agent` for large catalog diffs
 - Never commit `.env` or token files
+- Never commit `data/queue/` contents (gitignored; local runtime only)

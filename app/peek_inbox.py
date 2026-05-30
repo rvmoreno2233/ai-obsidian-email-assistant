@@ -141,8 +141,10 @@ def peek_inbox(top: int = 5) -> int:
 
         print("=" * 72)
         print(f"#{i}  {email.subject[:60]}")
-        print(f"    From:     {report.entity_contact or email.sender_name or '?'} "
-              f"<{email.sender_email}>")
+        print(
+            f"    From:     {report.entity_contact or email.sender_name or '?'} "
+            f"<{email.sender_email}>"
+        )
         print(f"    Received: {email.received_at}")
         print(f"    ID:       {email.message_id[:50]}...")
         print(f"    Company:  {report.entity_company or '— NO MATCH —'}")

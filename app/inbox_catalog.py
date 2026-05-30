@@ -2,15 +2,13 @@
 
 from __future__ import annotations
 
-import re
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from pathlib import Path
+from datetime import UTC, datetime
 
 import yaml
 
-from app.config import DATA_DIR, PROJECT_ROOT
+from app.config import DATA_DIR
 from app.graph_client import MsGraphBackend
 
 CATALOG_DIR = DATA_DIR / "catalog"
@@ -51,6 +49,7 @@ CONTACT_IMPORTANCE_LABELS = {
     "medium": "Medium — keyword filtered",
     "low": "Low — ignore",
 }
+
 
 @dataclass
 class MessageMeta:
@@ -156,7 +155,7 @@ def compute_contact_rank(count: int, last_seen: str, max_count: int) -> float:
     dt = _parse_dt(last_seen)
     recency = 0.0
     if dt:
-        days_ago = (datetime.now(timezone.utc) - dt).days
+        days_ago = (datetime.now(UTC) - dt).days
         recency = max(0.0, 1.0 - days_ago / 365.0)
     freq = count / max(max_count, 1)
     return round(0.7 * freq + 0.3 * recency, 4)
@@ -337,7 +336,7 @@ def save_catalog(domains: list[DomainStats], contacts: list[ContactStats]) -> No
     DOMAINS_FILE.write_text(
         yaml.dump(
             {
-                "scraped_at": datetime.now(timezone.utc).isoformat(),
+                "scraped_at": datetime.now(UTC).isoformat(),
                 "domain_count": len(domain_rows),
                 "domains": domain_rows,
             },
@@ -349,7 +348,7 @@ def save_catalog(domains: list[DomainStats], contacts: list[ContactStats]) -> No
     CONTACTS_FILE.write_text(
         yaml.dump(
             {
-                "scraped_at": datetime.now(timezone.utc).isoformat(),
+                "scraped_at": datetime.now(UTC).isoformat(),
                 "contact_count": len(contact_rows),
                 "contacts": contact_rows,
             },
@@ -391,7 +390,7 @@ def print_scrape_summary(domains: list[DomainStats], contacts: list[ContactStats
         agent = "yes" if c.agent_enabled else "no"
         print(f"{i:<4} {name:<30} {c.email:<35} {c.message_count:>5} {c.importance:<6} {agent}")
 
-    print(f"\nCatalog saved:")
+    print("\nCatalog saved:")
     print(f"  {DOMAINS_FILE}")
     print(f"  {CONTACTS_FILE}")
     print("\nNext: edit categories in inbox_domains.yaml, then run:")
