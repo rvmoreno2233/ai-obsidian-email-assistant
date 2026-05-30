@@ -7,7 +7,7 @@ from typing import Any, TypeVar
 import requests
 from pydantic import BaseModel, ValidationError
 
-from app.config import OLLAMA_HOST, OLLAMA_MODEL
+from app.config import ollama_settings
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -33,8 +33,9 @@ class OllamaClient:
         model: str | None = None,
         client=None,
     ) -> None:
-        self.host = host or OLLAMA_HOST
-        self.model = model or OLLAMA_MODEL
+        default_host, default_model = ollama_settings()
+        self.host = default_host if host is None else host
+        self.model = default_model if model is None else model
         self._client = client
 
     @property
@@ -84,8 +85,12 @@ class OllamaClient:
             models = response.json().get("models", [])
             result["models_available"] = [m.get("name", "") for m in models if m.get("name")]
             result["ok"] = True
+            result["model_ready"] = any(
+                name == self.model or name.split(":")[0] == self.model.split(":")[0]
+                for name in result["models_available"]
+            )
         except (requests.RequestException, ValueError):
-            pass
+            result["model_ready"] = False
         return result
 
     def chat_text(

@@ -12,6 +12,9 @@ const state = {
   previewDomain: null,
   previewEmails: [],
   previewDomainCategory: "",
+  previewContact: null,
+  contactPreviewEmails: [],
+  contactKeyPhrases: [],
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -22,10 +25,63 @@ async function api(path, opts = {}) {
     ...opts,
   });
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(err.detail || res.statusText);
+    const body = await res.json().catch(() => ({}));
+    const err = new Error(formatApiError(res.status, body));
+    err.status = res.status;
+    err.body = body;
+    throw err;
   }
   return res.json();
+}
+
+function formatApiError(status, body) {
+  const detail = body?.detail;
+  if (detail && typeof detail === "object") {
+    if (Array.isArray(detail.issues) && detail.issues.length) {
+      return detail.issues.map((i) => `${i.message} ${i.fix}`).join(" · ");
+    }
+    if (detail.message) return detail.message;
+  }
+  if (typeof detail === "string") return detail;
+  if (status === 405) {
+    return "Method not allowed — restart Studio so the latest API is loaded (email-assistant ui).";
+  }
+  if (status === 503) {
+    return "Live email refresh unavailable — check .env and authentication (see setup steps below).";
+  }
+  return detail || body?.message || `Request failed (${status})`;
+}
+
+function renderContactSetupHint(issues) {
+  const el = $("#contact-preview-setup");
+  if (!el) return;
+  if (!issues?.length) {
+    el.style.display = "none";
+    el.innerHTML = "";
+    return;
+  }
+  el.style.display = "block";
+  el.innerHTML = `
+    <strong>Setup needed to refresh emails from Outlook</strong>
+    <ol>
+      ${issues
+        .map(
+          (i) =>
+            `<li><span>${escapeHtml(i.message)}</span><code class="setup-fix">${escapeHtml(i.fix)}</code></li>`
+        )
+        .join("")}
+    </ol>`;
+}
+
+async function refreshContactSetupHint() {
+  try {
+    const status = await api("/api/status");
+    renderContactSetupHint(status.email_refresh_issues || []);
+    const btn = $("#btn-contact-refresh-previews");
+    if (btn) btn.disabled = !status.email_refresh_ready;
+  } catch {
+    renderContactSetupHint([]);
+  }
 }
 
 function toast(msg, isError = false) {
@@ -96,6 +152,7 @@ document.querySelectorAll("nav button").forEach((btn) => {
       refreshContactDomainPick().then(() => loadContacts());
       return;
     }
+    if (btn.dataset.panel === "knowledge") loadKnowledge();
     if (btn.dataset.panel === "actions") loadJobs();
     if (btn.dataset.panel === "email-settings") loadEmailSettings();
     if (btn.dataset.panel === "settings") loadTeamSettings();
@@ -109,6 +166,9 @@ async function loadStatus() {
   const badges = [];
   badges.push(`<span class="badge ${s.graph_configured ? "ok" : "warn"}">Graph ${s.graph_configured ? "configured" : "not configured"}</span>`);
   badges.push(`<span class="badge ${s.authenticated ? "ok" : "warn"}">${s.authenticated ? "Authenticated" : "Not authenticated"}</span>`);
+  if (s.email_refresh_ready === false) {
+    badges.push(`<span class="badge warn" title="Live email refresh needs Graph setup">Refresh: setup needed</span>`);
+  }
   $("#status-badges").innerHTML = badges.join(" ");
 
   $("#dashboard-cards").innerHTML = `
@@ -229,10 +289,12 @@ async function patchContactImportance(email, importance) {
     });
     toast(`Updated ${email.split("@")[0]}`);
     if (state.previewDomain) await loadDomainContacts(state.previewDomain);
+    if (state.previewContact === email) await loadContactPreviews(email, false);
     if ($("#panel-contacts").classList.contains("active")) await loadContacts();
   } catch (e) {
     toast(e.message, true);
     if (state.previewDomain) await loadDomainContacts(state.previewDomain);
+    if (state.previewContact === email) await loadContactPreviews(email, false);
     if ($("#panel-contacts").classList.contains("active")) await loadContacts();
   }
 }
@@ -285,29 +347,40 @@ async function loadDomainPreviews(domain, live = false) {
     .join("");
 
   container.querySelectorAll(".email-card").forEach((card) => {
-    card.addEventListener("click", () => showEmailDetail(card.dataset.msg, card.dataset.idx));
+    card.addEventListener("click", () =>
+      showEmailDetail(card.dataset.msg, card.dataset.idx, {
+        emails: state.previewEmails,
+        detailEl: $("#email-detail"),
+        cardSelector: "#preview-emails .email-card",
+      })
+    );
   });
 }
 
-async function showEmailDetail(messageId, idx) {
-  document.querySelectorAll(".email-card").forEach((c) => c.classList.remove("active"));
-  const card = document.querySelector(`.email-card[data-idx="${idx}"]`);
+async function showEmailDetail(messageId, idx, options = {}) {
+  const {
+    emails = state.previewEmails,
+    detailEl = $("#email-detail"),
+    cardSelector = ".email-card",
+  } = options;
+
+  document.querySelectorAll(cardSelector).forEach((c) => c.classList.remove("active"));
+  const card = document.querySelector(`${cardSelector}[data-idx="${idx}"]`);
   if (card) card.classList.add("active");
 
-  const detail = $("#email-detail");
-  detail.style.display = "block";
+  detailEl.style.display = "block";
 
   if (messageId) {
     try {
       const full = await api(`/api/messages/${encodeURIComponent(messageId)}/preview`);
-      detail.innerHTML = `<strong>${escapeHtml(full.subject)}</strong>\n\nFrom: ${escapeHtml(full.sender_email)}\n\n${escapeHtml(full.body_text || full.body_preview)}`;
+      detailEl.innerHTML = `<strong>${escapeHtml(full.subject)}</strong>\n\nFrom: ${escapeHtml(full.sender_email)}\n\n${escapeHtml(full.body_text || full.body_preview)}`;
     } catch {
-      const e = state.previewEmails[idx];
-      detail.textContent = `${e.subject}\n\n${e.body_preview || ""}`;
+      const e = emails[idx];
+      detailEl.textContent = `${e.subject}\n\n${e.body_preview || ""}`;
     }
   } else {
-    const e = state.previewEmails[idx];
-    detail.textContent = `${e.subject}\n\n${e.body_preview || "(Re-scrape inbox to capture body previews)"}`;
+    const e = emails[idx];
+    detailEl.textContent = `${e.subject}\n\n${e.body_preview || "(Re-scrape inbox to capture body previews)"}`;
   }
 }
 
@@ -462,7 +535,7 @@ async function loadContacts() {
   $("#contacts-tbody").innerHTML = data.items
     .map(
       (c) => `
-    <tr>
+    <tr data-email="${escapeHtml(c.email)}" class="${state.previewContact === c.email ? "active-row" : ""}">
       <td><input type="checkbox" class="contact-cb" value="${escapeHtml(c.email)}" ${state.selectedContacts.has(c.email) ? "checked" : ""} /></td>
       <td>${c.rank}</td>
       <td>${escapeHtml(c.name || "—")}</td>
@@ -474,6 +547,7 @@ async function loadContacts() {
           ${importanceOptions(normalizeImportance(c.importance))}
         </select>
       </td>
+      <td><button class="secondary contact-preview-btn" data-email="${escapeHtml(c.email)}">Preview</button></td>
     </tr>`
     )
     .join("");
@@ -487,12 +561,203 @@ async function loadContacts() {
   document.querySelectorAll(".contact-importance").forEach((sel) => {
     sel.addEventListener("change", () => patchContactImportance(sel.dataset.email, sel.value));
   });
+  document.querySelectorAll(".contact-preview-btn").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openContactPreviewPanel(btn.dataset.email);
+    });
+  });
 
   renderPagination("contacts", data.total, state.contactPage, (p) => {
     state.contactPage = p;
     loadContacts();
   });
 }
+
+function parseKeyPhrases(text) {
+  return [...new Set(text.split("\n").map((line) => line.trim()).filter(Boolean))];
+}
+
+function renderKeyPhraseChips(phrases) {
+  const el = $("#contact-key-phrase-chips");
+  if (!el) return;
+  if (!phrases.length) {
+    el.innerHTML = "";
+    return;
+  }
+  el.innerHTML = phrases
+    .map(
+      (phrase, i) =>
+        `<span class="key-phrase-chip" data-idx="${i}">${escapeHtml(phrase)} <button type="button" class="chip-remove" data-idx="${i}" title="Remove">×</button></span>`
+    )
+    .join("");
+  el.querySelectorAll(".chip-remove").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.idx, 10);
+      state.contactKeyPhrases.splice(idx, 1);
+      syncKeyPhrasesUi();
+    });
+  });
+}
+
+function syncKeyPhrasesUi() {
+  $("#contact-key-phrases-input").value = state.contactKeyPhrases.join("\n");
+  renderKeyPhraseChips(state.contactKeyPhrases);
+}
+
+async function openContactPreviewPanel(email) {
+  state.previewContact = email;
+  $("#contacts-layout").classList.add("panel-open");
+  $("#contact-preview-panel").classList.add("open");
+  $("#contact-email-detail").style.display = "none";
+  loadContacts();
+  await refreshContactSetupHint();
+  try {
+    await loadContactPreviews(email, true);
+  } catch (e) {
+    if (e.body?.detail?.issues) {
+      renderContactSetupHint(e.body.detail.issues);
+    }
+    $("#contact-preview-emails").innerHTML =
+      `<p class="filter-hint">${escapeHtml(e.message)}</p>`;
+  }
+}
+
+function closeContactPreviewPanel() {
+  state.previewContact = null;
+  state.contactPreviewEmails = [];
+  state.contactKeyPhrases = [];
+  $("#contacts-layout").classList.remove("panel-open");
+  $("#contact-preview-panel").classList.remove("open");
+  loadContacts();
+}
+
+async function loadContactPreviews(email, live = false) {
+  const data = await api(`/api/contacts/${encodeURIComponent(email)}/previews?live=${live}`);
+  if (data.graph_warning?.issues) {
+    renderContactSetupHint(data.graph_warning.issues);
+  } else if (data.graph_warning?.message) {
+    renderContactSetupHint([{ message: data.graph_warning.message, fix: "See steps above." }]);
+  }
+
+  const row = data.contact_row || {};
+  state.contactPreviewEmails = data.previews || [];
+  state.contactKeyPhrases = [...(row.key_phrases || [])];
+
+  $("#contact-preview-title").textContent = row.name ? `${row.name}` : email;
+  $("#contact-preview-meta").innerHTML = `
+    <div style="font-size:0.85rem;color:var(--muted);word-break:break-all;">${escapeHtml(email)}</div>
+    <div style="font-size:0.8rem;color:var(--muted);margin-top:0.35rem;">
+      ${escapeHtml(row.domain || "")} · ${escapeHtml(row.category || "unassigned")} ·
+      ${row.message_count || 0} msgs · ${escapeHtml(normalizeImportance(row.importance))} importance
+    </div>`;
+  syncKeyPhrasesUi();
+
+  const container = $("#contact-preview-emails");
+  if (!state.contactPreviewEmails.length) {
+    container.innerHTML =
+      `<p style="color:var(--muted);font-size:0.85rem;">No previews yet. Complete Graph setup above, then click Refresh emails.</p>`;
+    return;
+  }
+  const cacheNote = data.graph_warning
+    ? `<p class="filter-hint">Showing cached subjects — live refresh unavailable until setup is complete.</p>`
+    : "";
+  container.innerHTML =
+    cacheNote +
+    state.contactPreviewEmails
+      .map(
+        (e, i) => `
+    <div class="email-card" data-idx="${i}" data-msg="${e.message_id || ""}">
+      <div class="subject">${escapeHtml(e.subject || "(no subject)")}</div>
+      <div class="meta">${escapeHtml(e.sender_name || e.sender_email || "")} · ${(e.received_at || "").slice(0, 16)}</div>
+      <div class="body">${escapeHtml(e.body_preview || "(no preview — click for full text)")}</div>
+    </div>`
+      )
+      .join("");
+
+  container.querySelectorAll(".email-card").forEach((card) => {
+    card.addEventListener("click", () =>
+      showEmailDetail(card.dataset.msg, card.dataset.idx, {
+        emails: state.contactPreviewEmails,
+        detailEl: $("#contact-email-detail"),
+        cardSelector: "#contact-preview-emails .email-card",
+      })
+    );
+  });
+}
+
+function addSelectedKeyPhrase() {
+  const selection = window.getSelection()?.toString().trim();
+  if (!selection) {
+    toast("Select text in an email first", true);
+    return;
+  }
+  if (!state.contactKeyPhrases.includes(selection)) {
+    state.contactKeyPhrases.push(selection);
+  }
+  syncKeyPhrasesUi();
+  toast("Added key phrase");
+}
+
+async function saveContactKeyPhrases() {
+  if (!state.previewContact) return;
+  const fromInput = parseKeyPhrases($("#contact-key-phrases-input").value);
+  state.contactKeyPhrases = fromInput;
+  try {
+    await api(`/api/contacts/${encodeURIComponent(state.previewContact)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ key_phrases: state.contactKeyPhrases }),
+    });
+    toast("Key phrases saved");
+    syncKeyPhrasesUi();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+function copyContactKeyPhrases() {
+  const text = parseKeyPhrases($("#contact-key-phrases-input").value).join("\n");
+  if (!text) {
+    toast("No key phrases to copy", true);
+    return;
+  }
+  navigator.clipboard.writeText(text).then(
+    () => toast("Copied key phrases"),
+    () => toast("Copy failed — select and copy manually", true)
+  );
+}
+
+$("#contact-preview-close")?.addEventListener("click", closeContactPreviewPanel);
+$("#btn-contact-refresh-previews")?.addEventListener("click", async () => {
+  if (!state.previewContact) return;
+  try {
+    const { job_id } = await api(
+      `/api/contacts/${encodeURIComponent(state.previewContact)}/refresh-previews`,
+      { method: "POST" }
+    );
+    toast("Refreshing contact emails…");
+    pollJob(job_id, () => {
+      refreshContactSetupHint();
+      loadContactPreviews(state.previewContact, false);
+    });
+  } catch (e) {
+    if (e.body?.detail?.issues) {
+      renderContactSetupHint(e.body.detail.issues);
+    }
+    toast(e.message, true);
+  }
+});
+$("#btn-add-key-phrase")?.addEventListener("click", addSelectedKeyPhrase);
+$("#btn-save-key-phrases")?.addEventListener("click", saveContactKeyPhrases);
+$("#btn-copy-key-phrases")?.addEventListener("click", copyContactKeyPhrases);
+$("#contact-key-phrases-input")?.addEventListener(
+  "input",
+  debounce(() => {
+    state.contactKeyPhrases = parseKeyPhrases($("#contact-key-phrases-input").value);
+    renderKeyPhraseChips(state.contactKeyPhrases);
+  }, 200)
+);
 
 $("#contact-search").addEventListener(
   "input",
@@ -678,34 +943,132 @@ async function loadEmailSettings() {
   ]);
 }
 
+function ollamaModelBase(name) {
+  return (name || "").split(":")[0];
+}
+
+function ollamaModelsMatch(a, b) {
+  return !!a && !!b && (a === b || ollamaModelBase(a) === ollamaModelBase(b));
+}
+
+function isOllamaModelReady(configured, models, apiFlag) {
+  if (apiFlag === true) return true;
+  if (!configured || !models.length) return false;
+  return models.some((m) => ollamaModelsMatch(configured, m));
+}
+
+function findMatchingOllamaModel(configured, models) {
+  if (!configured) return null;
+  return models.find((m) => ollamaModelsMatch(configured, m)) || null;
+}
+
 async function loadOllamaHealth() {
   const badge = $("#ollama-badge");
-  const modelEl = $("#ollama-model");
   const hostEl = $("#ollama-host");
+  const configuredEl = $("#ollama-configured-model");
+  const modelSelect = $("#ollama-test-model");
+  const modelsList = $("#ollama-models-list");
   try {
     const h = await api("/api/ollama/health");
     badge.textContent = h.ok ? "Connected" : "Unavailable";
     badge.className = "badge " + (h.ok ? "ok" : "warn");
-    modelEl.textContent = h.model ? `Model: ${h.model}` : "";
     hostEl.textContent = h.host ? `Host: ${h.host}` : "";
+
+    const models = h.models_available || [];
+    const configured = h.model || "";
+    const matched = findMatchingOllamaModel(configured, models);
+    const ready = isOllamaModelReady(configured, models, h.model_ready);
+    configuredEl.innerHTML = ready
+      ? `<span class="badge ok">${escapeHtml(configured)}</span> — ready${
+          matched && matched !== configured ? ` (installed as <code>${escapeHtml(matched)}</code>)` : ""
+        }`
+      : `<span class="badge warn">${escapeHtml(configured || "(not set)")}</span> — not installed. Pick a model below and update <code>OLLAMA_MODEL</code> in <code>.env</code>.`;
+
+    modelSelect.innerHTML = models.length
+      ? models.map((m) => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join("")
+      : '<option value="">No models — run ollama pull …</option>';
+    if (matched) {
+      modelSelect.value = matched;
+    } else if (models.length) {
+      modelSelect.value = models[0];
+    }
+
+    if (!models.length) {
+      modelsList.innerHTML = '<p class="es-empty">No models found. Run <code>ollama pull llama3</code> or similar.</p>';
+      return;
+    }
+
+    modelsList.innerHTML = models
+      .map(
+        (m) => `
+      <div class="model-test-row" data-model="${escapeHtml(m)}">
+        <div class="model-test-name">
+          <strong>${escapeHtml(m)}</strong>
+          ${ollamaModelsMatch(m, configured) ? '<span class="badge ok">configured</span>' : ""}
+        </div>
+        <div class="model-test-result" id="model-test-${cssId(m)}"></div>
+        <button class="secondary btn-model-test" data-model="${escapeHtml(m)}">Test</button>
+      </div>`
+      )
+      .join("");
+
+    modelsList.querySelectorAll(".btn-model-test").forEach((btn) => {
+      btn.addEventListener("click", () => runOllamaModelTest(btn.dataset.model, btn));
+    });
   } catch (e) {
     badge.textContent = "Error";
     badge.className = "badge warn";
-    modelEl.textContent = "";
     hostEl.textContent = e.message;
+    configuredEl.textContent = "";
+    modelsList.innerHTML = "";
+  }
+}
+
+function cssId(name) {
+  return name.replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+async function runOllamaModelTest(model, btn) {
+  const resultEl = $(`#model-test-${cssId(model)}`);
+  if (resultEl) resultEl.textContent = "Running…";
+  if (btn) btn.disabled = true;
+  try {
+    const body = await api("/api/ollama/test", {
+      method: "POST",
+      body: JSON.stringify({
+        prompt: $("#ollama-test-prompt").value,
+        model,
+      }),
+    });
+    const text = `OK · ${body.latency_ms} ms · ${body.reply}`;
+    if (resultEl) {
+      resultEl.textContent = text;
+      resultEl.className = "model-test-result ok";
+    }
+    return body;
+  } catch (e) {
+    if (resultEl) {
+      resultEl.textContent = e.message;
+      resultEl.className = "model-test-result error";
+    }
+    throw e;
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
 $("#btn-ollama-test").addEventListener("click", async () => {
   const result = $("#ollama-test-result");
+  const model = $("#ollama-test-model").value;
+  if (!model) {
+    toast("No model selected", true);
+    return;
+  }
   result.style.display = "block";
-  result.textContent = "Running…";
+  result.textContent = `Testing ${model}…`;
   try {
-    const body = await api("/api/ollama/test", {
-      method: "POST",
-      body: JSON.stringify({ prompt: $("#ollama-test-prompt").value }),
-    });
-    result.textContent = `OK (${body.latency_ms} ms)\n${body.reply}`;
+    const body = await runOllamaModelTest(model);
+    result.textContent = `${body.model}\nOK (${body.latency_ms} ms)\n${body.reply}`;
   } catch (e) {
     result.textContent = `Error: ${e.message}`;
   }
@@ -1181,6 +1544,139 @@ async function loadAutoQueue() {
 }
 
 $("#btn-auto-refresh").addEventListener("click", loadAutoQueue);
+
+// --- Knowledge base ---
+async function loadKnowledgeStats() {
+  const stats = await api("/api/knowledge/stats");
+  $("#knowledge-stats").innerHTML = `
+    <div class="card"><div class="label">Indexed emails</div><div class="value">${stats.entry_count}</div></div>
+    <div class="card"><div class="label">With context</div><div class="value">${stats.with_context}</div></div>
+    <div class="card"><div class="label">Approved domains</div><div class="value">${stats.approved_domain_count}</div></div>
+    <div class="card"><div class="label">Approved contacts</div><div class="value">${stats.approved_contact_count}</div></div>
+  `;
+  const last = stats.last_sync_at ? stats.last_sync_at.slice(0, 19).replace("T", " ") : "never";
+  const meta = $("#knowledge-search-meta");
+  if (meta && !meta.dataset.hasQuery) {
+    meta.textContent = `Last sync: ${last} · ${stats.without_context} email(s) awaiting recontextualization`;
+  }
+}
+
+async function loadKnowledgeJobs() {
+  const jobs = await api("/api/jobs");
+  const relevant = jobs.filter((j) =>
+    ["sync-knowledge", "recontextualize-knowledge"].includes(j.name)
+  );
+  const el = $("#knowledge-job-log");
+  if (!el) return;
+  el.innerHTML = relevant.length
+    ? relevant
+        .map(
+          (j) =>
+            `<div class="job-item"><strong>${j.name}</strong> · ${j.status} · ${j.message || j.error || ""} <span style="color:var(--muted)">${(j.finished_at || j.created_at || "").slice(0, 19)}</span></div>`
+        )
+        .join("")
+    : "<div style='color:var(--muted)'>No knowledge jobs yet</div>";
+}
+
+async function loadKnowledge() {
+  await loadKnowledgeStats();
+  await loadKnowledgeJobs();
+}
+
+async function runKnowledgeAction(path, body) {
+  try {
+    const { job_id } = await api(path, { method: "POST", body: JSON.stringify(body) });
+    pollJob(job_id, () => {
+      loadKnowledgeStats();
+      loadKnowledgeJobs();
+    });
+    loadKnowledgeJobs();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+$("#btn-knowledge-sync")?.addEventListener("click", () =>
+  runKnowledgeAction("/api/knowledge/sync", {
+    max_pages: parseInt($("#knowledge-sync-pages").value, 10) || 50,
+    recontextualize_new: $("#knowledge-recontext-new").checked,
+  })
+);
+
+$("#btn-knowledge-recontext")?.addEventListener("click", () =>
+  runKnowledgeAction("/api/knowledge/recontextualize", {
+    force: $("#knowledge-recontext-force").checked,
+  })
+);
+
+async function searchKnowledge() {
+  const q = $("#knowledge-search").value.trim();
+  const domain = $("#knowledge-domain-filter").value.trim();
+  const meta = $("#knowledge-search-meta");
+  meta.dataset.hasQuery = q ? "1" : "";
+  const data = await api(
+    `/api/knowledge/search?q=${encodeURIComponent(q)}&domain=${encodeURIComponent(domain)}&limit=50`
+  );
+  meta.textContent = `${data.total} result(s)${q ? ` for “${q}”` : ""}`;
+  const el = $("#knowledge-results");
+  if (!data.items.length) {
+    el.innerHTML = '<p class="es-empty">No matches. Sync the knowledge base first or broaden your query.</p>';
+    $("#knowledge-detail").style.display = "none";
+    return;
+  }
+  el.innerHTML = data.items
+    .map(
+      (item) => `
+    <div class="kb-hit" data-id="${escapeHtml(item.message_id)}">
+      <div class="kb-hit-subject">${escapeHtml(item.subject || "(no subject)")}</div>
+      <div class="kb-hit-meta">
+        ${escapeHtml(item.received_at?.slice(0, 10) || "")}
+        · ${escapeHtml(item.sender_email)}
+        · ${escapeHtml(item.domain_category || item.domain)}
+        ${item.context?.summary ? " · summarized" : ""}
+      </div>
+      <div class="kb-hit-snippet">${escapeHtml(item.snippet || item.body_preview || "")}</div>
+    </div>`
+    )
+    .join("");
+  el.querySelectorAll(".kb-hit").forEach((row) => {
+    row.addEventListener("click", () => showKnowledgeDetail(row.dataset.id));
+  });
+}
+
+async function showKnowledgeDetail(messageId) {
+  const entry = await api(`/api/knowledge/${encodeURIComponent(messageId)}`);
+  const detail = $("#knowledge-detail");
+  detail.style.display = "block";
+  const ctx = entry.context || {};
+  detail.innerHTML = `
+    <button class="close-btn secondary" id="knowledge-detail-close">Close</button>
+    <h3>${escapeHtml(entry.subject)}</h3>
+    <p class="es-meta">${escapeHtml(entry.sender_name || entry.sender_email)} · ${escapeHtml(entry.received_at?.slice(0, 19).replace("T", " ") || "")}</p>
+    ${ctx.summary ? `<p><strong>Summary:</strong> ${escapeHtml(ctx.summary)}</p>` : ""}
+    ${ctx.topics?.length ? `<p><strong>Topics:</strong> ${ctx.topics.map((t) => `<span class="badge">${escapeHtml(t)}</span>`).join(" ")}</p>` : ""}
+    ${ctx.action_items?.length ? `<p><strong>Action items:</strong></p><ul>${ctx.action_items.map((a) => `<li>${escapeHtml(a)}</li>`).join("")}</ul>` : ""}
+    <pre class="es-pre">${escapeHtml(entry.body_text || entry.body_preview || "")}</pre>
+    ${entry.web_link ? `<a href="${escapeHtml(entry.web_link)}" target="_blank" rel="noopener">Open in Outlook</a>` : ""}
+  `;
+  $("#knowledge-detail-close").addEventListener("click", () => {
+    detail.style.display = "none";
+  });
+}
+
+$("#btn-knowledge-search")?.addEventListener("click", searchKnowledge);
+$("#knowledge-search")?.addEventListener(
+  "keydown",
+  (e) => {
+    if (e.key === "Enter") searchKnowledge();
+  }
+);
+$("#knowledge-search")?.addEventListener(
+  "input",
+  debounce(() => {
+    if ($("#knowledge-search").value.trim().length >= 2) searchKnowledge();
+  }, 400)
+);
 
 // --- Helpers ---
 function renderPagination(prefix, total, page, onPage) {

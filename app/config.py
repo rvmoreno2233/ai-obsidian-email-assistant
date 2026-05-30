@@ -11,9 +11,23 @@ from dotenv import load_dotenv
 load_dotenv()
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = Path(os.getenv("DATA_DIR", PROJECT_ROOT / "data"))
 PROMPTS_DIR = PROJECT_ROOT / "prompts"
 FIXTURES_DIR = PROJECT_ROOT / "tests" / "fixtures"
+DATA_DIR = Path(os.getenv("DATA_DIR", PROJECT_ROOT / "data"))
+
+
+def reload_env() -> None:
+    """Re-read .env so Studio picks up OLLAMA_MODEL changes without a full restart."""
+    load_dotenv(override=True)
+
+
+def ollama_settings() -> tuple[str, str]:
+    """Current Ollama host and model from environment."""
+    reload_env()
+    host = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434")
+    model = os.getenv("OLLAMA_MODEL", "llama3.1")
+    return host, model
+
 
 MSGRAPH_CLIENT_ID = os.getenv("MSGRAPH_CLIENT_ID", "")
 MSGRAPH_TENANT_ID = os.getenv("MSGRAPH_TENANT_ID", "common")

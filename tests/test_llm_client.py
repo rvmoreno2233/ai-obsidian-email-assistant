@@ -25,6 +25,7 @@ def test_health_check_ok():
         "model": "llama3.1",
         "host": "http://127.0.0.1:11434",
         "models_available": ["llama3.1:latest", "mistral:latest"],
+        "model_ready": True,
     }
 
 
@@ -40,6 +41,7 @@ def test_health_check_unreachable():
     assert result["model"] == "llama3.1"
     assert result["host"] == "http://127.0.0.1:11434"
     assert result["models_available"] == []
+    assert result["model_ready"] is False
 
 
 def test_health_check_http_error():
@@ -51,6 +53,7 @@ def test_health_check_http_error():
 
     assert result["ok"] is False
     assert result["models_available"] == []
+    assert result["model_ready"] is False
 
 
 def test_chat_text_returns_stripped_response():
