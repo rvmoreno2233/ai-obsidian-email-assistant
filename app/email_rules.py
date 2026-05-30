@@ -119,3 +119,75 @@ def get_template(template_id: str, path: Path | None = None) -> ResponseTemplate
         if template.id == template_id:
             return template
     return None
+
+
+def add_rule(rule: EmailRule, path: Path | None = None) -> EmailRule:
+    """Append a rule; raises ValueError when id already exists."""
+    catalog = load_rules(path)
+    if get_rule(rule.id, path):
+        msg = f"Rule already exists: {rule.id}"
+        raise ValueError(msg)
+    catalog.rules.append(rule)
+    save_rules(catalog, path)
+    return rule
+
+
+def update_rule(rule_id: str, patch: dict, path: Path | None = None) -> EmailRule | None:
+    """Merge patch into an existing rule by id."""
+    catalog = load_rules(path)
+    for index, rule in enumerate(catalog.rules):
+        if rule.id == rule_id:
+            updated = rule.model_copy(update=patch)
+            catalog.rules[index] = updated
+            save_rules(catalog, path)
+            return updated
+    return None
+
+
+def delete_rule(rule_id: str, path: Path | None = None) -> bool:
+    """Remove a rule by id; returns False when not found."""
+    catalog = load_rules(path)
+    original_len = len(catalog.rules)
+    catalog.rules = [rule for rule in catalog.rules if rule.id != rule_id]
+    if len(catalog.rules) == original_len:
+        return False
+    save_rules(catalog, path)
+    return True
+
+
+def add_template(template: ResponseTemplate, path: Path | None = None) -> ResponseTemplate:
+    """Append a template; raises ValueError when id already exists."""
+    if get_template(template.id, path):
+        msg = f"Template already exists: {template.id}"
+        raise ValueError(msg)
+    catalog = load_templates(path)
+    catalog.templates.append(template)
+    save_templates(catalog, path)
+    return template
+
+
+def update_template(
+    template_id: str,
+    patch: dict,
+    path: Path | None = None,
+) -> ResponseTemplate | None:
+    """Merge patch into an existing template by id."""
+    catalog = load_templates(path)
+    for index, template in enumerate(catalog.templates):
+        if template.id == template_id:
+            updated = template.model_copy(update=patch)
+            catalog.templates[index] = updated
+            save_templates(catalog, path)
+            return updated
+    return None
+
+
+def delete_template(template_id: str, path: Path | None = None) -> bool:
+    """Remove a template by id; returns False when not found."""
+    catalog = load_templates(path)
+    original_len = len(catalog.templates)
+    catalog.templates = [t for t in catalog.templates if t.id != template_id]
+    if len(catalog.templates) == original_len:
+        return False
+    save_templates(catalog, path)
+    return True

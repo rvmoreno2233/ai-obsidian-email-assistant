@@ -1,8 +1,9 @@
 # Phase 4: API & Poller — Studio Backend Routes
 
 **Agent:** `@email-settings-api-agent`  
-**Branch:** `feature/email-settings-auto-response`  
-**Prerequisites:** Phase 3 complete
+**Branch:** `feat/email-settings-phase4-api-poller`  
+**Prerequisites:** Phase 3 complete  
+**Status:** Complete (2026-05-30)
 
 ## Objective
 
@@ -12,8 +13,12 @@ Expose Email Settings via FastAPI routes and add a background poller wired into 
 
 | File | Action |
 |------|--------|
+| `app/inbox_processor.py` | NEW — shared `process_inbox()` for CLI, jobs, poller |
 | `app/web/poller.py` | NEW — `BackgroundPoller` asyncio task |
 | `app/web/app.py` | MODIFY — routes + lifespan start/stop poller |
+| `app/email_rules.py` | MODIFY — CRUD helpers for rules/templates |
+| `run_local.py` | MODIFY — delegates to `process_inbox()` |
+| `tests/test_studio_api.py` | NEW — API and poller tests |
 
 ## API routes
 
@@ -48,18 +53,19 @@ Expose Email Settings via FastAPI routes and add a background poller wired into 
 ## Validation
 
 ```bash
-pytest tests/test_studio_api.py -v -k "email_settings or ollama or queue"  # add as needed
+pytest tests/test_studio_api.py -v
+EMAIL_BACKEND=mock RULE_ENGINE_ENABLED=true python run_local.py
 email-assistant ui  # routes respond (manual)
 ```
 
 ## Exit criteria
 
-- [ ] All routes registered and return expected shapes
-- [ ] `process-now` uses existing job runner pattern
-- [ ] Poller starts/stops with Studio lifespan
-- [ ] Approve/reject updates queue JSONL
-- [ ] Plan moved to `completed/` when done
+- [x] All routes registered and return expected shapes
+- [x] `process-now` uses existing job runner pattern
+- [x] Poller starts/stops with Studio lifespan
+- [x] Approve/reject updates queue JSONL
+- [x] Plan moved to `completed/` when done
 
 ## Next phase
 
-→ [phase5-email-settings-ui.md](phase5-email-settings-ui.md) with `@email-settings-ui-agent`
+→ [phase5-email-settings-ui.md](../active/phase5-email-settings-ui.md) with `@email-settings-ui-agent`
