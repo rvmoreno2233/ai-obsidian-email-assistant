@@ -1,11 +1,10 @@
 """Tests for entity_matcher."""
 
 import json
-from pathlib import Path
 
 import pytest
 
-from app.config import DATA_DIR, FIXTURES_DIR
+from app.config import FIXTURES_DIR
 from app.entity_matcher import load_catalogs, match_entities, match_waiting_items
 from app.schemas import NormalizedEmail
 
@@ -13,8 +12,8 @@ FIXTURE_PATH = FIXTURES_DIR / "sample_emails.json"
 
 
 @pytest.fixture
-def catalogs():
-    return load_catalogs(DATA_DIR)
+def catalogs(fixture_catalog_dir):
+    return load_catalogs(fixture_catalog_dir)
 
 
 @pytest.fixture

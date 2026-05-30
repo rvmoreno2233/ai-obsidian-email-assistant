@@ -37,6 +37,7 @@ Per-user (not committed):
 |------|---------|
 | `.env` | Graph client ID, personal paths |
 | `~/.cache/email-assistant/msal_cache.json` | OAuth token |
+| `data/queue/` | Approval/auto queues, poller cursor, processing log |
 
 ## Workflow in the UI
 

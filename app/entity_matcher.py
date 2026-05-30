@@ -65,7 +65,9 @@ def match_company(email: NormalizedEmail, catalogs: Catalogs) -> str | None:
 
     # Domain match wins — never override with body keywords
     for company in catalogs.companies.companies:
-        if domain and any(d.lower() in domain or domain.endswith(d.lower()) for d in company.domains):
+        if domain and any(
+            d.lower() in domain or domain.endswith(d.lower()) for d in company.domains
+        ):
             return company.name
         if email.sender_email.lower() in {c.lower() for c in company.contacts}:
             return company.name

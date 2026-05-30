@@ -1,0 +1,17 @@
+companies:
+  - name: Acme Health
+    domains:
+      - acmehealth.com
+    keywords:
+      - acme
+    contacts:
+      - jane.doe@acmehealth.com
+      - mark.smith@acmehealth.com
+
+  - name: Northstar Analytics
+    domains:
+      - northstaranalytics.com
+    keywords:
+      - northstar
+    contacts:
+      - mark.lee@northstaranalytics.com

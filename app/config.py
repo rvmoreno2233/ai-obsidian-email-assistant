@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -54,7 +54,7 @@ OBSIDIAN_VAULT_PATH = os.getenv("OBSIDIAN_VAULT_PATH", _default_vault)
 MSAL_CACHE_PATH = Path.home() / ".cache" / "email-assistant" / "msal_cache.json"
 
 
-class AutoSendMode(str, Enum):
+class AutoSendMode(StrEnum):
     OFF = "off"
     SAFE = "safe"
     FULL = "full"

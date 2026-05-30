@@ -1,7 +1,7 @@
 # Master Plan: Email Settings & Auto-Response Pipeline
 
 **Source:** `.cursor/plans/email_settings_auto-response_b94c774f.plan.md` (architect draft)  
-**Branch:** `feature/email-settings-auto-response`  
+**Branch:** `feat/email-settings-phase6-validation` (merged phases 1–5 on `main`)  
 **MVP scope:** Drafts only (`AUTO_SEND_MODE=off`). Real Graph send is Phase 2 (out of scope).
 
 ## Phase map
@@ -50,9 +50,9 @@ flowchart TD
 
 ## Global exit criteria
 
-- [ ] All six phase plans moved to `completed/`
-- [ ] `pytest` green for new test modules
-- [ ] `ruff check .` and `black --check .` pass
+- [x] All six phase plans moved to `completed/`
+- [x] `pytest` green for new test modules
+- [x] `ruff check .` and `black --check .` pass
 - [ ] Studio Email Settings tab smoke-tested
-- [ ] `data/queue/` gitignored; privacy rule documented
+- [x] `data/queue/` gitignored; privacy rule documented
 - [ ] PR merged to `main`

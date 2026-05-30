@@ -6,18 +6,18 @@ Copy this prompt when starting a new chat or phase. Replace `[PHASE N]` and chec
 
 ## Context
 
-Implementing **Email Settings** tab and keyword-triggered auto-response pipeline on branch `feat/email-settings-phase5-ui`.
+Implementing **Email Settings** tab and keyword-triggered auto-response pipeline on branch `feat/email-settings-phase6-validation`.
 
-- **Master plan:** `.cursor/plans/active/email-settings-master.md`
+- **Master plan:** `.cursor/plans/completed/email-settings-master.md`
 - **Architect source:** `.cursor/plans/email_settings_auto-response_b94c774f.plan.md`
 - **Repo:** https://github.com/rvmoreno2233/ai-obsidian-email-assistant
 - **MVP:** Drafts only. `AUTO_SEND_MODE=off`. Approve = mark queue entry; user sends from Outlook.
 
 ## Current phase
 
-**Active:** Phase 6 — Validation & release  
+**Active:** Phase 6 — Validation & release (in progress — PR pending)  
 **Agent:** `@test-agent`, `@privacy-agent`, `@reviewer-agent`  
-**Plan file:** `.cursor/plans/active/phase6-email-settings-validation.md`
+**Plan file:** `.cursor/plans/completed/phase6-email-settings-validation.md`
 
 ## Progress checklist
 
@@ -58,8 +58,8 @@ Mark `[x]` when a phase is fully done (tests pass, plan moved to `completed/`).
 - [x] **Agent:** `@email-settings-ui-agent`
 
 ### Phase 6 — Validation & release
-- [ ] Full pytest + ruff + black
-- [ ] `@privacy-agent` review (`data/queue/` PII)
+- [x] Full pytest + ruff + black
+- [x] `@privacy-agent` review (`data/queue/` PII)
 - [ ] `@reviewer-agent` sign-off
 - [ ] PR to `main`
 

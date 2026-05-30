@@ -1,0 +1,19 @@
+projects:
+  - name: Acme Data Pipeline
+    company: Acme Health
+    keywords:
+      - ETL
+      - claims file
+      - ingestion
+      - schema
+      - SFTP
+    notification_level: high
+
+  - name: Executive Dashboard
+    company: Northstar Analytics
+    keywords:
+      - Power BI
+      - dashboard
+      - KPI
+      - refresh
+    notification_level: medium

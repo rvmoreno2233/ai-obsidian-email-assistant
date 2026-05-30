@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 
 import yaml
 
-from app.email_rules import EmailRulesCatalog, ResponseTemplatesCatalog, save_rules, save_templates
-from app.entity_matcher import Catalogs, load_catalogs, match_entities
+from app.email_rules import EmailRulesCatalog, ResponseTemplatesCatalog
+from app.entity_matcher import load_catalogs, match_entities
 from app.graph_client import MockGraphBackend
 from app.obsidian_writer import ObsidianWriter
 from app.response_queue import ResponseQueueStore
@@ -100,7 +100,9 @@ def test_rule_matches_body_only(tmp_path: Path):
             }
         ]
     }
-    catalog = EmailRulesCatalog.model_validate(yaml.safe_load(_write_rules(tmp_path, payload).read_text()))
+    catalog = EmailRulesCatalog.model_validate(
+        yaml.safe_load(_write_rules(tmp_path, payload).read_text())
+    )
     rule = catalog.rules[0]
 
     assert rule_matches(_sample_email(subject="Hello", body_text="ticket 99"), rule)
@@ -121,7 +123,9 @@ def test_rule_matches_subject_and_body(tmp_path: Path):
             }
         ]
     }
-    catalog = EmailRulesCatalog.model_validate(yaml.safe_load(_write_rules(tmp_path, payload).read_text()))
+    catalog = EmailRulesCatalog.model_validate(
+        yaml.safe_load(_write_rules(tmp_path, payload).read_text())
+    )
     rule = catalog.rules[0]
 
     assert rule_matches(_sample_email(subject="CaptureRx update", body_text="ticket 123"), rule)

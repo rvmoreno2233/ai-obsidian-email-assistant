@@ -41,7 +41,16 @@ pytest
 | `OLLAMA_HOST` | Ollama API URL (default `http://127.0.0.1:11434`) |
 | `OLLAMA_MODEL` | Model name (default `llama3.1`) |
 | `MSGRAPH_CLIENT_ID` | Azure AD app client ID |
+| `MSGRAPH_TENANT_ID` | Azure AD tenant ID |
+| `MSGRAPH_SCOPES` | Graph scopes (default `Mail.Read Mail.ReadWrite`) |
 | `AUTO_SEND_MODE` | `off` (MVP default), `safe`, or `full` |
+| `STUDIO_HOST` | Studio bind address (default `127.0.0.1`) |
+| `STUDIO_PORT` | Studio port (default `8080`) |
+| `DATA_DIR` | YAML catalogs and rules path (default `data`) |
+| `QUEUE_DIR` | Runtime response queues (default `data/queue`, gitignored) |
+| `RULE_ENGINE_ENABLED` | Enable keyword auto-response rules (default `false`) |
+| `POLLER_INTERVAL_SECONDS` | Background poller interval (default `300`) |
+| `UPDATE_WAITING_YAML` | Persist waiting-item closures to YAML (default `false`) |
 
 ## Microsoft Graph setup
 

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 from app.config import CLASSIFIER_MODE, PROMPTS_DIR
 from app.entity_matcher import Catalogs, is_newsletter_sender, load_catalogs
 from app.schemas import EmailClassification, EntityMatchResult, NormalizedEmail
@@ -22,7 +20,9 @@ class RuleBasedClassifier:
                 return c.importance
         return None
 
-    def _medium_keyword_match(self, email: NormalizedEmail, entity_match: EntityMatchResult) -> bool:
+    def _medium_keyword_match(
+        self, email: NormalizedEmail, entity_match: EntityMatchResult
+    ) -> bool:
         blob = f"{email.subject} {email.body_text}".lower()
         if "?" in email.subject or "?" in email.body_text:
             return True

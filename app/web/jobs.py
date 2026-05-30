@@ -5,13 +5,14 @@ from __future__ import annotations
 import threading
 import traceback
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
-from enum import Enum
-from typing import Any, Callable
+from datetime import UTC, datetime
+from enum import StrEnum
+from typing import Any
 
 
-class JobStatus(str, Enum):
+class JobStatus(StrEnum):
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -38,7 +39,7 @@ def create_job(name: str, fn: Callable[[], dict[str, Any]]) -> Job:
     job = Job(
         id=uuid.uuid4().hex[:12],
         name=name,
-        created_at=datetime.now(timezone.utc).isoformat(),
+        created_at=datetime.now(UTC).isoformat(),
     )
     with _lock:
         _jobs[job.id] = job
@@ -60,7 +61,7 @@ def create_job(name: str, fn: Callable[[], dict[str, Any]]) -> Job:
                 job.result = {"traceback": traceback.format_exc()}
         finally:
             with _lock:
-                job.finished_at = datetime.now(timezone.utc).isoformat()
+                job.finished_at = datetime.now(UTC).isoformat()
 
     threading.Thread(target=_run, daemon=True).start()
     return job

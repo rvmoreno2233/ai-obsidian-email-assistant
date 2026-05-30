@@ -6,12 +6,12 @@ import json
 from pathlib import Path
 
 import pytest
-import yaml
 
 from app.config import FIXTURES_DIR
 from app.schemas import NormalizedEmail
 
 FIXTURE_EMAILS_PATH = FIXTURES_DIR / "sample_emails.json"
+FIXTURE_CATALOG_DIR = FIXTURES_DIR / "catalog"
 
 
 @pytest.fixture
@@ -31,14 +31,18 @@ def tmp_vault(tmp_path: Path) -> Path:
 
 
 @pytest.fixture
-def data_dir(tmp_path: Path) -> Path:
-    """Copy minimal YAML catalogs into a temp data dir."""
-    from app.config import DATA_DIR
+def fixture_catalog_dir() -> Path:
+    """Synthetic YAML catalogs for deterministic matcher tests."""
+    return FIXTURE_CATALOG_DIR
 
+
+@pytest.fixture
+def data_dir(tmp_path: Path, fixture_catalog_dir: Path) -> Path:
+    """Copy synthetic fixture catalogs into a temp data dir."""
     dest = tmp_path / "data"
     dest.mkdir()
     for name in ("companies.yaml", "contacts.yaml", "projects.yaml", "waiting_for.yaml"):
-        src = DATA_DIR / name
+        src = fixture_catalog_dir / name
         if src.exists():
             (dest / name).write_text(src.read_text(encoding="utf-8"))
     return dest

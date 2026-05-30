@@ -215,7 +215,10 @@ def api_domain_previews(domain: str, live: bool = False) -> dict[str, Any]:
 
     items = [p.model_dump() for p in previews] if previews else []
     if row and not items and row.sample_subjects:
-        items = [{"subject": s, "body_preview": "", "sender_email": "", "message_id": ""} for s in row.sample_subjects]
+        items = [
+            {"subject": s, "body_preview": "", "sender_email": "", "message_id": ""}
+            for s in row.sample_subjects
+        ]
 
     return {"domain": domain, "previews": items, "domain_row": row.model_dump() if row else None}
 
@@ -232,7 +235,9 @@ def api_domain_contacts(domain: str) -> dict[str, Any]:
         items.append(
             {
                 **c.model_dump(),
-                "importance": c.importance if c.importance in CONTACT_IMPORTANCE_LABELS else "medium",
+                "importance": (
+                    c.importance if c.importance in CONTACT_IMPORTANCE_LABELS else "medium"
+                ),
             }
         )
     return {
@@ -358,7 +363,9 @@ def api_list_contacts(
 def api_patch_contact(email: str, patch: ContactPatch) -> dict[str, Any]:
     data = patch.model_dump(exclude_none=True)
     if "importance" in data and data["importance"] in CONTACT_IMPORTANCE_LABELS:
-        contact_row = next((c for c in load_contacts().contacts if c.email.lower() == email.lower()), None)
+        contact_row = next(
+            (c for c in load_contacts().contacts if c.email.lower() == email.lower()), None
+        )
         if not contact_row:
             raise HTTPException(404, f"Contact not found: {email}")
         domain_row = get_domain(contact_row.domain)
@@ -387,7 +394,9 @@ def api_bulk_contacts(patch: BulkContactPatch) -> dict[str, Any]:
 def api_patch_contact_importance(email: str, patch: ContactPatch) -> dict[str, Any]:
     if not patch.importance or patch.importance not in CONTACT_IMPORTANCE_LABELS:
         raise HTTPException(400, "importance required (high, medium, low)")
-    contact_row = next((c for c in load_contacts().contacts if c.email.lower() == email.lower()), None)
+    contact_row = next(
+        (c for c in load_contacts().contacts if c.email.lower() == email.lower()), None
+    )
     if not contact_row:
         raise HTTPException(404, f"Contact not found: {email}")
     domain_row = get_domain(contact_row.domain)

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -11,9 +11,8 @@ from pydantic import BaseModel, Field
 
 from app.inbox_catalog import (
     CATALOG_DIR,
-    CONTACTS_FILE,
     CONTACT_IMPORTANCE_LABELS,
-    DEFAULT_EXCLUDED_CATEGORIES,
+    CONTACTS_FILE,
     DOMAINS_FILE,
 )
 
@@ -84,14 +83,16 @@ def load_domains() -> DomainCatalog:
 
 def load_contacts() -> ContactCatalog:
     raw = _load_yaml(CONTACTS_FILE)
-    return ContactCatalog.model_validate(raw) if raw.get("contacts") is not None else ContactCatalog()
+    return (
+        ContactCatalog.model_validate(raw) if raw.get("contacts") is not None else ContactCatalog()
+    )
 
 
 def save_domains(catalog: DomainCatalog) -> None:
     CATALOG_DIR.mkdir(parents=True, exist_ok=True)
     catalog.domain_count = len(catalog.domains)
     if not catalog.scraped_at:
-        catalog.scraped_at = datetime.now(timezone.utc).isoformat()
+        catalog.scraped_at = datetime.now(UTC).isoformat()
     DOMAINS_FILE.write_text(
         yaml.dump(catalog.model_dump(), default_flow_style=False, sort_keys=False),
         encoding="utf-8",
@@ -102,7 +103,7 @@ def save_contacts(catalog: ContactCatalog) -> None:
     CATALOG_DIR.mkdir(parents=True, exist_ok=True)
     catalog.contact_count = len(catalog.contacts)
     if not catalog.scraped_at:
-        catalog.scraped_at = datetime.now(timezone.utc).isoformat()
+        catalog.scraped_at = datetime.now(UTC).isoformat()
     CONTACTS_FILE.write_text(
         yaml.dump(catalog.model_dump(), default_flow_style=False, sort_keys=False),
         encoding="utf-8",
@@ -193,7 +194,9 @@ def get_contacts_for_domain(domain: str) -> list[ContactRow]:
     return sorted(rows, key=lambda r: (-r.message_count, r.email.lower()))
 
 
-def apply_contact_importance(email: str, importance: str, domain_category: str) -> ContactRow | None:
+def apply_contact_importance(
+    email: str, importance: str, domain_category: str
+) -> ContactRow | None:
     catalog = load_contacts()
     key = email.lower()
     for row in catalog.contacts:
@@ -286,7 +289,10 @@ def filter_domains(
             or (r.config_client_abbrev and q in r.config_client_abbrev.lower())
             or (r.config_client_name and q in r.config_client_name.lower())
             or any(q in s.lower() for s in r.sample_subjects)
-            or any(q in (e.subject or "").lower() or q in (e.body_preview or "").lower() for e in r.sample_emails)
+            or any(
+                q in (e.subject or "").lower() or q in (e.body_preview or "").lower()
+                for e in r.sample_emails
+            )
         ]
     if category:
         rows = [r for r in rows if r.category == category]

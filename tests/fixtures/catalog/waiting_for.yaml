@@ -1,0 +1,22 @@
+waiting_for:
+  - id: acme_schema_approval
+    project: Acme Data Pipeline
+    company: Acme Health
+    waiting_for: Jane Doe
+    keywords:
+      - schema approved
+      - approval
+      - approved data model
+    notify_when_found: true
+    status: open
+
+  - id: northstar_refresh_timing
+    project: Executive Dashboard
+    company: Northstar Analytics
+    waiting_for: Mark Lee
+    keywords:
+      - refresh schedule
+      - daily refresh
+      - data latency
+    notify_when_found: true
+    status: open

@@ -1,7 +1,7 @@
 # Phase 6: Validation, Privacy, Release
 
 **Agents:** `@test-agent`, `@privacy-agent`, `@reviewer-agent`  
-**Branch:** `feature/email-settings-auto-response`  
+**Branch:** `feat/email-settings-phase6-validation`  
 **Prerequisites:** Phases 1–5 complete
 
 ## Objective
@@ -27,13 +27,13 @@ email-assistant ui
 
 ## Exit criteria
 
-- [ ] Full pytest suite green
-- [ ] Lint/format clean
-- [ ] Privacy checklist passed (`@privacy-agent`)
+- [x] Full pytest suite green
+- [x] Lint/format clean
+- [x] Privacy checklist passed (`@privacy-agent`)
 - [ ] Reviewer sign-off (`@reviewer-agent`)
 - [ ] PR opened against `main`
-- [ ] All phase plans moved to `completed/`
-- [ ] Master plan moved to `completed/`
+- [x] All phase plans moved to `completed/`
+- [x] Master plan moved to `completed/`
 
 ## Post-merge
 

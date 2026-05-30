@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import yaml
@@ -187,11 +187,8 @@ class ObsidianWriter:
     def mark_waiting_item_complete(self, item_id: str, evidence: str) -> None:
         """Update Waiting For note and close item in waiting_for.yaml."""
         waiting_path = self._note_path("Email Assistant", "Waiting For")
-        now = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        block = (
-            f"### {now} — Completed: `{item_id}`\n"
-            f"Evidence: {evidence}\n"
-        )
+        now = datetime.now(UTC).strftime("%Y-%m-%d")
+        block = f"### {now} — Completed: `{item_id}`\n" f"Evidence: {evidence}\n"
         self._append_section(waiting_path, "## Completed Items", block)
 
         if UPDATE_WAITING_YAML:
