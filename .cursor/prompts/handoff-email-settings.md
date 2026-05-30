@@ -6,7 +6,7 @@ Copy this prompt when starting a new chat or phase. Replace `[PHASE N]` and chec
 
 ## Context
 
-Implementing **Email Settings** tab and keyword-triggered auto-response pipeline on branch `feat/email-settings-phase4-api-poller`.
+Implementing **Email Settings** tab and keyword-triggered auto-response pipeline on branch `feat/email-settings-phase5-ui`.
 
 - **Master plan:** `.cursor/plans/active/email-settings-master.md`
 - **Architect source:** `.cursor/plans/email_settings_auto-response_b94c774f.plan.md`
@@ -15,9 +15,9 @@ Implementing **Email Settings** tab and keyword-triggered auto-response pipeline
 
 ## Current phase
 
-**Active:** Phase 5 — UI  
-**Agent:** `@email-settings-ui-agent`  
-**Plan file:** `.cursor/plans/active/phase5-email-settings-ui.md`
+**Active:** Phase 6 — Validation & release  
+**Agent:** `@test-agent`, `@privacy-agent`, `@reviewer-agent`  
+**Plan file:** `.cursor/plans/active/phase6-email-settings-validation.md`
 
 ## Progress checklist
 
@@ -51,11 +51,11 @@ Mark `[x]` when a phase is fully done (tests pass, plan moved to `completed/`).
 - [x] **Agent:** `@email-settings-api-agent`
 
 ### Phase 5 — UI
-- [ ] Email Settings nav + panel in `index.html`
-- [ ] Handlers in `app.js`, styles in `styles.css`
-- [ ] `docs/STUDIO.md` updated
-- [ ] Manual smoke test passed
-- [ ] **Agent:** `@email-settings-ui-agent`
+- [x] Email Settings nav + panel in `index.html`
+- [x] Handlers in `app.js`, styles in `styles.css`
+- [x] `docs/STUDIO.md` updated
+- [x] Manual smoke test passed
+- [x] **Agent:** `@email-settings-ui-agent`
 
 ### Phase 6 — Validation & release
 - [ ] Full pytest + ruff + black

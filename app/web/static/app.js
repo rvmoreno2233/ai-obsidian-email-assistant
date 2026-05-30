@@ -97,6 +97,7 @@ document.querySelectorAll("nav button").forEach((btn) => {
       return;
     }
     if (btn.dataset.panel === "actions") loadJobs();
+    if (btn.dataset.panel === "email-settings") loadEmailSettings();
     if (btn.dataset.panel === "settings") loadTeamSettings();
   });
 });
@@ -645,6 +646,541 @@ $("#btn-save-team").addEventListener("click", async () => {
     toast(e.message, true);
   }
 });
+
+// --- Email Settings ---
+
+const emailSettingsState = {
+  templates: [],
+  rules: [],
+  approvalPreviewId: null,
+};
+
+function parseKeywords(text) {
+  return text
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function formatKeywords(list) {
+  return (list || []).join(", ");
+}
+
+async function loadEmailSettings() {
+  await Promise.all([
+    loadOllamaHealth(),
+    loadTemplates(),
+    loadRules(),
+    loadPollerSettings(),
+    loadApprovalQueue(),
+    loadAutoQueue(),
+    loadEmailSettingsJobs(),
+  ]);
+}
+
+async function loadOllamaHealth() {
+  const badge = $("#ollama-badge");
+  const modelEl = $("#ollama-model");
+  const hostEl = $("#ollama-host");
+  try {
+    const h = await api("/api/ollama/health");
+    badge.textContent = h.ok ? "Connected" : "Unavailable";
+    badge.className = "badge " + (h.ok ? "ok" : "warn");
+    modelEl.textContent = h.model ? `Model: ${h.model}` : "";
+    hostEl.textContent = h.host ? `Host: ${h.host}` : "";
+  } catch (e) {
+    badge.textContent = "Error";
+    badge.className = "badge warn";
+    modelEl.textContent = "";
+    hostEl.textContent = e.message;
+  }
+}
+
+$("#btn-ollama-test").addEventListener("click", async () => {
+  const result = $("#ollama-test-result");
+  result.style.display = "block";
+  result.textContent = "Running…";
+  try {
+    const body = await api("/api/ollama/test", {
+      method: "POST",
+      body: JSON.stringify({ prompt: $("#ollama-test-prompt").value }),
+    });
+    result.textContent = `OK (${body.latency_ms} ms)\n${body.reply}`;
+  } catch (e) {
+    result.textContent = `Error: ${e.message}`;
+  }
+});
+
+async function loadTemplates() {
+  const data = await api("/api/templates");
+  emailSettingsState.templates = data.items || [];
+  renderTemplatesList();
+  fillRuleTemplateSelect();
+}
+
+function renderTemplatesList() {
+  const el = $("#templates-list");
+  if (!emailSettingsState.templates.length) {
+    el.innerHTML = '<p class="es-empty">No templates yet. Create one to attach to rules.</p>';
+    return;
+  }
+  el.innerHTML = emailSettingsState.templates
+    .map(
+      (t) => `
+    <div class="es-card" data-id="${escapeHtml(t.id)}">
+      <div class="es-card-header">
+        <strong>${escapeHtml(t.name)}</strong>
+        <span class="es-meta">${escapeHtml(t.id)}</span>
+      </div>
+      <div class="es-card-body">${escapeHtml((t.body || "").slice(0, 120))}${(t.body || "").length > 120 ? "…" : ""}</div>
+      <div class="es-card-actions">
+        <button class="secondary btn-template-edit" data-id="${escapeHtml(t.id)}">Edit</button>
+        <button class="secondary btn-template-delete" data-id="${escapeHtml(t.id)}">Delete</button>
+      </div>
+    </div>`
+    )
+    .join("");
+
+  el.querySelectorAll(".btn-template-edit").forEach((btn) => {
+    btn.addEventListener("click", () => openTemplateEditor(btn.dataset.id));
+  });
+  el.querySelectorAll(".btn-template-delete").forEach((btn) => {
+    btn.addEventListener("click", () => deleteTemplate(btn.dataset.id));
+  });
+}
+
+function openTemplateEditor(id) {
+  const editor = $("#template-editor");
+  editor.style.display = "block";
+  if (id) {
+    const t = emailSettingsState.templates.find((x) => x.id === id);
+    if (!t) return;
+    $("#template-edit-id").value = t.id;
+    $("#template-name").value = t.name || "";
+    $("#template-subject-prefix").value = t.subject_prefix || "Re: ";
+    $("#template-body").value = t.body || "";
+    $("#template-ai-instructions").value = t.ai_instructions || "";
+  } else {
+    $("#template-edit-id").value = "";
+    $("#template-name").value = "";
+    $("#template-subject-prefix").value = "Re: ";
+    $("#template-body").value = "";
+    $("#template-ai-instructions").value = "";
+    $("#template-ai-desc").value = "";
+  }
+}
+
+function closeTemplateEditor() {
+  $("#template-editor").style.display = "none";
+  $("#template-edit-id").value = "";
+}
+
+$("#btn-template-new").addEventListener("click", () => openTemplateEditor(null));
+$("#btn-template-cancel").addEventListener("click", closeTemplateEditor);
+
+$("#btn-template-ai-assist").addEventListener("click", async () => {
+  const desc = $("#template-ai-desc").value.trim();
+  if (!desc) {
+    toast("Enter a description for AI assist", true);
+    return;
+  }
+  try {
+    toast("Generating with AI…");
+    const result = await api("/api/templates/ai-assist", {
+      method: "POST",
+      body: JSON.stringify({ description: desc }),
+    });
+    if (result.body) $("#template-body").value = result.body;
+    if (result.ai_instructions) $("#template-ai-instructions").value = result.ai_instructions;
+    toast("AI draft applied");
+  } catch (e) {
+    toast(e.message, true);
+  }
+});
+
+$("#btn-template-save").addEventListener("click", async () => {
+  const name = $("#template-name").value.trim();
+  if (!name) {
+    toast("Template name is required", true);
+    return;
+  }
+  const payload = {
+    name,
+    subject_prefix: $("#template-subject-prefix").value,
+    body: $("#template-body").value,
+    ai_instructions: $("#template-ai-instructions").value,
+  };
+  const editId = $("#template-edit-id").value;
+  try {
+    if (editId) {
+      await api(`/api/templates/${encodeURIComponent(editId)}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      });
+      toast("Template updated");
+    } else {
+      await api("/api/templates", { method: "POST", body: JSON.stringify(payload) });
+      toast("Template created");
+    }
+    closeTemplateEditor();
+    await loadTemplates();
+    await loadRules();
+  } catch (e) {
+    toast(e.message, true);
+  }
+});
+
+async function deleteTemplate(id) {
+  if (!confirm("Delete this template? Rules using it may break.")) return;
+  try {
+    await api(`/api/templates/${encodeURIComponent(id)}`, { method: "DELETE" });
+    toast("Template deleted");
+    await loadTemplates();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+function fillRuleTemplateSelect(selected = "") {
+  const sel = $("#rule-template-id");
+  if (!sel) return;
+  sel.innerHTML =
+    '<option value="">— select template —</option>' +
+    emailSettingsState.templates
+      .map(
+        (t) =>
+          `<option value="${escapeHtml(t.id)}" ${t.id === selected ? "selected" : ""}>${escapeHtml(t.name)}</option>`
+      )
+      .join("");
+}
+
+async function loadRules() {
+  const data = await api("/api/rules");
+  emailSettingsState.rules = data.items || [];
+  renderRulesList();
+}
+
+function renderRulesList() {
+  const el = $("#rules-list");
+  if (!emailSettingsState.rules.length) {
+    el.innerHTML = '<p class="es-empty">No rules yet. Create a template first, then add a keyword rule.</p>';
+    return;
+  }
+  const tplMap = Object.fromEntries(emailSettingsState.templates.map((t) => [t.id, t.name]));
+  el.innerHTML = emailSettingsState.rules
+    .map((r) => {
+      const m = r.match || {};
+      const kw = [...(m.subject_keywords || []), ...(m.body_keywords || [])].slice(0, 4).join(", ");
+      return `
+    <div class="es-card rule-card ${r.enabled ? "" : "disabled"}" data-id="${escapeHtml(r.id)}">
+      <div class="es-card-header">
+        <strong>${escapeHtml(r.name)}</strong>
+        <span class="badge ${r.enabled ? "ok" : "warn"}">${r.enabled ? "On" : "Off"}</span>
+      </div>
+      <div class="es-card-meta">
+        <span>Keywords: ${escapeHtml(kw || "—")}</span>
+        <span>Scope: ${escapeHtml(m.scope || "subject_or_body")}</span>
+        <span>Template: ${escapeHtml(tplMap[r.template_id] || r.template_id)}</span>
+        <span>${escapeHtml(r.generation)} → ${escapeHtml(r.delivery)}</span>
+      </div>
+      <div class="es-card-actions">
+        <button class="secondary btn-rule-edit" data-id="${escapeHtml(r.id)}">Edit</button>
+        <button class="secondary btn-rule-toggle" data-id="${escapeHtml(r.id)}" data-enabled="${r.enabled}">
+          ${r.enabled ? "Disable" : "Enable"}
+        </button>
+        <button class="secondary btn-rule-delete" data-id="${escapeHtml(r.id)}">Delete</button>
+      </div>
+    </div>`;
+    })
+    .join("");
+
+  el.querySelectorAll(".btn-rule-edit").forEach((btn) => {
+    btn.addEventListener("click", () => openRuleEditor(btn.dataset.id));
+  });
+  el.querySelectorAll(".btn-rule-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => toggleRule(btn.dataset.id, btn.dataset.enabled !== "true"));
+  });
+  el.querySelectorAll(".btn-rule-delete").forEach((btn) => {
+    btn.addEventListener("click", () => deleteRule(btn.dataset.id));
+  });
+}
+
+function openRuleEditor(id) {
+  const editor = $("#rule-editor");
+  editor.style.display = "block";
+  fillRuleTemplateSelect();
+  if (id) {
+    const r = emailSettingsState.rules.find((x) => x.id === id);
+    if (!r) return;
+    const m = r.match || {};
+    $("#rule-edit-id").value = r.id;
+    $("#rule-name").value = r.name || "";
+    $("#rule-enabled").checked = r.enabled !== false;
+    $("#rule-subject-keywords").value = formatKeywords(m.subject_keywords);
+    $("#rule-body-keywords").value = formatKeywords(m.body_keywords);
+    $("#rule-scope").value = m.scope || "subject_or_body";
+    $("#rule-mode").value = m.mode || "any";
+    fillRuleTemplateSelect(r.template_id);
+    $("#rule-generation").value = r.generation || "canned";
+    $("#rule-delivery").value = r.delivery || "approval";
+    $("#rule-append-note").checked = r.append_to_existing_note !== false;
+  } else {
+    $("#rule-edit-id").value = "";
+    $("#rule-name").value = "";
+    $("#rule-enabled").checked = true;
+    $("#rule-subject-keywords").value = "";
+    $("#rule-body-keywords").value = "";
+    $("#rule-scope").value = "subject_or_body";
+    $("#rule-mode").value = "any";
+    fillRuleTemplateSelect();
+    $("#rule-generation").value = "canned";
+    $("#rule-delivery").value = "approval";
+    $("#rule-append-note").checked = true;
+  }
+}
+
+function closeRuleEditor() {
+  $("#rule-editor").style.display = "none";
+  $("#rule-edit-id").value = "";
+}
+
+$("#btn-rule-new").addEventListener("click", () => {
+  if (!emailSettingsState.templates.length) {
+    toast("Create a template first", true);
+    return;
+  }
+  openRuleEditor(null);
+});
+$("#btn-rule-cancel").addEventListener("click", closeRuleEditor);
+
+$("#btn-rule-save").addEventListener("click", async () => {
+  const name = $("#rule-name").value.trim();
+  const templateId = $("#rule-template-id").value;
+  if (!name || !templateId) {
+    toast("Name and template are required", true);
+    return;
+  }
+  const payload = {
+    name,
+    enabled: $("#rule-enabled").checked,
+    match: {
+      subject_keywords: parseKeywords($("#rule-subject-keywords").value),
+      body_keywords: parseKeywords($("#rule-body-keywords").value),
+      scope: $("#rule-scope").value,
+      mode: $("#rule-mode").value,
+    },
+    template_id: templateId,
+    generation: $("#rule-generation").value,
+    delivery: $("#rule-delivery").value,
+    append_to_existing_note: $("#rule-append-note").checked,
+  };
+  const editId = $("#rule-edit-id").value;
+  try {
+    if (editId) {
+      await api(`/api/rules/${encodeURIComponent(editId)}`, {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      });
+      toast("Rule updated");
+    } else {
+      await api("/api/rules", { method: "POST", body: JSON.stringify(payload) });
+      toast("Rule created");
+    }
+    closeRuleEditor();
+    await loadRules();
+  } catch (e) {
+    toast(e.message, true);
+  }
+});
+
+async function toggleRule(id, enabled) {
+  try {
+    await api(`/api/rules/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      body: JSON.stringify({ enabled }),
+    });
+    toast(enabled ? "Rule enabled" : "Rule disabled");
+    await loadRules();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+async function deleteRule(id) {
+  if (!confirm("Delete this rule?")) return;
+  try {
+    await api(`/api/rules/${encodeURIComponent(id)}`, { method: "DELETE" });
+    toast("Rule deleted");
+    await loadRules();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+async function loadPollerSettings() {
+  const s = await api("/api/email-settings/poller");
+  $("#poller-enabled").checked = !!s.enabled;
+  $("#poller-interval").value = s.interval_seconds || 300;
+  const stats = [];
+  if (s.last_run) stats.push(`Last run: ${s.last_run.slice(0, 19).replace("T", " ")}`);
+  if (s.last_processed_count != null) stats.push(`Processed: ${s.last_processed_count}`);
+  if (s.last_processed_message_id) stats.push(`Cursor: ${s.last_processed_message_id.slice(0, 12)}…`);
+  $("#poller-stats").textContent = stats.join(" · ") || "No runs yet";
+}
+
+$("#btn-poller-save").addEventListener("click", async () => {
+  try {
+    await api("/api/email-settings/poller", {
+      method: "PUT",
+      body: JSON.stringify({
+        enabled: $("#poller-enabled").checked,
+        interval_seconds: parseInt($("#poller-interval").value, 10) || 300,
+      }),
+    });
+    toast("Poller settings saved");
+    await loadPollerSettings();
+  } catch (e) {
+    toast(e.message, true);
+  }
+});
+
+$("#btn-process-now").addEventListener("click", async () => {
+  try {
+    const top = parseInt($("#process-now-top").value, 10) || 25;
+    const { job_id } = await api("/api/email-settings/process-now", {
+      method: "POST",
+      body: JSON.stringify({ top }),
+    });
+    toast(`Process job started: ${job_id}`);
+    pollJob(job_id, async () => {
+      await loadPollerSettings();
+      await loadApprovalQueue();
+      await loadAutoQueue();
+      await loadEmailSettingsJobs();
+    });
+    loadEmailSettingsJobs();
+  } catch (e) {
+    toast(e.message, true);
+  }
+});
+
+async function loadEmailSettingsJobs() {
+  const jobs = await api("/api/jobs");
+  const processJobs = jobs.filter((j) => j.name === "process-inbox");
+  const el = $("#email-settings-job-log");
+  if (!el) return;
+  el.innerHTML = processJobs.length
+    ? processJobs
+        .map(
+          (j) =>
+            `<div class="job-item"><strong>${j.name}</strong> · ${j.status} · ${j.message || j.error || ""} <span style="color:var(--muted)">${(j.finished_at || j.created_at || "").slice(0, 19)}</span></div>`
+        )
+        .join("")
+    : "<div style='color:var(--muted)'>No process-inbox jobs yet</div>";
+}
+
+async function loadApprovalQueue() {
+  const data = await api("/api/queue/approval");
+  const el = $("#approval-queue");
+  const items = (data.items || []).filter((i) => i.status === "pending");
+  if (!items.length) {
+    el.innerHTML = '<p class="es-empty">No pending approvals.</p>';
+    return;
+  }
+  el.innerHTML = items
+    .map(
+      (item) => `
+    <div class="queue-row" data-id="${escapeHtml(item.id)}">
+      <div class="queue-row-main">
+        <div class="queue-subject">${escapeHtml(item.subject || "(no subject)")}</div>
+        <div class="queue-meta">
+          ${escapeHtml(item.created_at?.slice(0, 19).replace("T", " ") || "")}
+          · Rule: ${escapeHtml(item.rule_id)}
+          · <span class="badge">${escapeHtml(item.status)}</span>
+        </div>
+        ${emailSettingsState.approvalPreviewId === item.id ? `<pre class="es-pre queue-preview">${escapeHtml(item.body || "")}</pre>` : ""}
+      </div>
+      <div class="queue-row-actions">
+        <button class="secondary btn-queue-preview" data-id="${escapeHtml(item.id)}">Preview</button>
+        <button class="btn-queue-approve" data-id="${escapeHtml(item.id)}">Approve</button>
+        <button class="secondary btn-queue-reject" data-id="${escapeHtml(item.id)}">Reject</button>
+      </div>
+    </div>`
+    )
+    .join("");
+
+  el.querySelectorAll(".btn-queue-preview").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      emailSettingsState.approvalPreviewId =
+        emailSettingsState.approvalPreviewId === btn.dataset.id ? null : btn.dataset.id;
+      loadApprovalQueue();
+    });
+  });
+  el.querySelectorAll(".btn-queue-approve").forEach((btn) => {
+    btn.addEventListener("click", () => approveQueueEntry(btn.dataset.id));
+  });
+  el.querySelectorAll(".btn-queue-reject").forEach((btn) => {
+    btn.addEventListener("click", () => rejectQueueEntry(btn.dataset.id));
+  });
+}
+
+async function approveQueueEntry(id) {
+  try {
+    await api(`/api/queue/approval/${encodeURIComponent(id)}/approve`, { method: "POST" });
+    toast("Approved");
+    emailSettingsState.approvalPreviewId = null;
+    await loadApprovalQueue();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+async function rejectQueueEntry(id) {
+  try {
+    await api(`/api/queue/approval/${encodeURIComponent(id)}/reject`, { method: "POST" });
+    toast("Rejected");
+    emailSettingsState.approvalPreviewId = null;
+    await loadApprovalQueue();
+  } catch (e) {
+    toast(e.message, true);
+  }
+}
+
+$("#btn-approval-refresh").addEventListener("click", loadApprovalQueue);
+
+async function loadAutoQueue() {
+  const data = await api("/api/queue/auto");
+  const el = $("#auto-queue");
+  const items = data.items || [];
+  if (!items.length) {
+    el.innerHTML = '<p class="es-empty">Auto queue is empty.</p>';
+    return;
+  }
+  el.innerHTML = items
+    .map(
+      (item) => `
+    <div class="queue-row readonly">
+      <div class="queue-row-main">
+        <div class="queue-subject">${escapeHtml(item.subject || "(no subject)")}</div>
+        <div class="queue-meta">
+          ${escapeHtml(item.created_at?.slice(0, 19).replace("T", " ") || "")}
+          · ${escapeHtml(item.status)}
+          ${item.thread_note ? ` · <a href="#" class="thread-note-link" data-note="${escapeHtml(item.thread_note)}">Thread note</a>` : ""}
+        </div>
+      </div>
+    </div>`
+    )
+    .join("");
+
+  el.querySelectorAll(".thread-note-link").forEach((link) => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      toast(`Thread note: ${link.dataset.note}`);
+    });
+  });
+}
+
+$("#btn-auto-refresh").addEventListener("click", loadAutoQueue);
 
 // --- Helpers ---
 function renderPagination(prefix, total, page, onPage) {

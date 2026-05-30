@@ -19,6 +19,7 @@
     <button data-panel="domains">Domains</button>
     <button data-panel="contacts">Contacts</button>
     <button data-panel="actions">Actions</button>
+    <button data-panel="email-settings">Email Settings</button>
     <button data-panel="settings">Team Settings</button>
   </nav>
 
@@ -172,6 +173,196 @@
         CLI auth: run <code>email-assistant authenticate</code> in terminal if Graph is not connected.
       </p>
       <div class="job-log" id="job-log"></div>
+    </section>
+
+    <!-- Email Settings -->
+    <section id="panel-email-settings" class="panel">
+      <p class="filter-hint" style="margin-top:0;">
+        Configure Ollama, reply templates, keyword rules, background poller, and approval queues.
+        MVP creates drafts only — nothing is auto-sent.
+      </p>
+
+      <!-- 1. Ollama status -->
+      <div class="es-section">
+        <h2 class="es-heading">Ollama</h2>
+        <div class="es-ollama-status">
+          <span id="ollama-badge" class="badge">Checking…</span>
+          <span id="ollama-model" class="es-meta"></span>
+          <span id="ollama-host" class="es-meta"></span>
+        </div>
+        <div class="toolbar" style="margin-top:0.75rem;">
+          <input type="text" id="ollama-test-prompt" placeholder="Test prompt" value="Reply with exactly: ok" style="flex:1;" />
+          <button id="btn-ollama-test" class="secondary">Run test prompt</button>
+        </div>
+        <pre id="ollama-test-result" class="es-pre" style="display:none;"></pre>
+      </div>
+
+      <!-- 2. Templates -->
+      <div class="es-section">
+        <div class="es-section-header">
+          <h2 class="es-heading">Templates</h2>
+          <button id="btn-template-new" class="secondary">New template</button>
+        </div>
+        <div id="templates-list" class="es-cards"></div>
+        <div id="template-editor" class="es-editor" style="display:none;">
+          <input type="hidden" id="template-edit-id" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" id="template-name" />
+            </div>
+            <div class="form-group">
+              <label>Subject prefix</label>
+              <input type="text" id="template-subject-prefix" value="Re: " />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Body</label>
+            <textarea id="template-body" rows="6" placeholder="Hi {sender_first_name},&#10;{ai_response}"></textarea>
+          </div>
+          <div class="form-group">
+            <label>AI instructions (for LLM generation)</label>
+            <textarea id="template-ai-instructions" rows="3"></textarea>
+          </div>
+          <div class="toolbar">
+            <input type="text" id="template-ai-desc" placeholder="Describe template for AI assist…" style="flex:1;" />
+            <button id="btn-template-ai-assist" class="secondary">Draft with AI</button>
+            <button id="btn-template-save">Save template</button>
+            <button id="btn-template-cancel" class="secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Rules -->
+      <div class="es-section">
+        <div class="es-section-header">
+          <h2 class="es-heading">Rules</h2>
+          <button id="btn-rule-new" class="secondary">New rule</button>
+        </div>
+        <div id="rules-list" class="es-cards"></div>
+        <div id="rule-editor" class="es-editor" style="display:none;">
+          <input type="hidden" id="rule-edit-id" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" id="rule-name" />
+            </div>
+            <div class="form-group">
+              <label class="filter-toggle" style="margin-top:1.5rem;">
+                <input type="checkbox" id="rule-enabled" checked />
+                Enabled
+              </label>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Subject keywords (comma-separated)</label>
+              <input type="text" id="rule-subject-keywords" placeholder="invoice, payment" />
+            </div>
+            <div class="form-group">
+              <label>Body keywords (comma-separated)</label>
+              <input type="text" id="rule-body-keywords" placeholder="urgent, asap" />
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Scope</label>
+              <select id="rule-scope">
+                <option value="subject_or_body">Subject or body</option>
+                <option value="subject_only">Subject only</option>
+                <option value="body_only">Body only</option>
+                <option value="subject_and_body">Subject and body</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Match mode</label>
+              <select id="rule-mode">
+                <option value="any">Any keyword</option>
+                <option value="all">All keywords</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Template</label>
+              <select id="rule-template-id"></select>
+            </div>
+            <div class="form-group">
+              <label>Generation</label>
+              <select id="rule-generation">
+                <option value="canned">Canned</option>
+                <option value="llm">LLM</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Delivery</label>
+              <select id="rule-delivery">
+                <option value="approval">Approval queue</option>
+                <option value="auto">Auto queue (draft)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="filter-toggle" style="margin-top:1.5rem;">
+                <input type="checkbox" id="rule-append-note" checked />
+                Append to thread note
+              </label>
+            </div>
+          </div>
+          <div class="toolbar">
+            <button id="btn-rule-save">Save rule</button>
+            <button id="btn-rule-cancel" class="secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Run controls -->
+      <div class="es-section">
+        <h2 class="es-heading">Run controls</h2>
+        <div class="cards">
+          <div class="card">
+            <div class="label">Process inbox now</div>
+            <p style="font-size:0.85rem;color:var(--muted);margin:0.5rem 0;">Run pipeline on recent messages</p>
+            <input type="number" id="process-now-top" value="25" min="1" max="200" style="width:80px;margin-bottom:0.5rem;" />
+            <span style="color:var(--muted);font-size:0.8rem;"> messages</span>
+            <br />
+            <button id="btn-process-now" style="margin-top:0.5rem;">Process now</button>
+          </div>
+          <div class="card">
+            <div class="label">Background poller</div>
+            <label class="filter-toggle" style="margin:0.5rem 0;">
+              <input type="checkbox" id="poller-enabled" />
+              Enabled
+            </label>
+            <div style="margin:0.5rem 0;">
+              <label style="font-size:0.8rem;color:var(--muted);">Interval (seconds)</label>
+              <input type="number" id="poller-interval" value="300" min="30" max="86400" style="width:100px;margin-left:0.5rem;" />
+            </div>
+            <button id="btn-poller-save" class="secondary" style="margin-top:0.25rem;">Save poller settings</button>
+            <p id="poller-stats" class="es-meta" style="margin-top:0.75rem;"></p>
+          </div>
+        </div>
+        <div class="job-log" id="email-settings-job-log"></div>
+      </div>
+
+      <!-- 5. Approval queue -->
+      <div class="es-section">
+        <div class="es-section-header">
+          <h2 class="es-heading">Approval queue</h2>
+          <button id="btn-approval-refresh" class="secondary">Refresh</button>
+        </div>
+        <div id="approval-queue" class="queue-list"></div>
+      </div>
+
+      <!-- 6. Auto queue -->
+      <div class="es-section">
+        <div class="es-section-header">
+          <h2 class="es-heading">Auto queue</h2>
+          <button id="btn-auto-refresh" class="secondary">Refresh</button>
+        </div>
+        <div id="auto-queue" class="queue-list"></div>
+      </div>
     </section>
 
     <!-- Settings -->
